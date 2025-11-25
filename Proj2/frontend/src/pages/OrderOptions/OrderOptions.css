@@ -7,3 +7,16 @@
   min-height: 100vh;
   background: linear-gradient(to bottom right, #e0f2fe, #dbeafe);
 }
+
+rewardPreview: {
+  marginTop: '8px',
+  fontSize: '14px',
+  fontWeight: '600',
+  color: '#d97706'  // warm gold color
+},
+poolRewards: {
+  marginTop: '6px',
+  fontSize: '14px',
+  fontWeight: '600',
+  color: '#c2410c'
+}

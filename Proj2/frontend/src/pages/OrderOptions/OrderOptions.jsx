@@ -5,6 +5,7 @@ import { Clock, Users, Zap, MapPin, TrendingDown, Leaf } from 'lucide-react';
 import { createGroup, getAllGroups, joinGroup } from '../../api/groups';
 import { placeGroupOrder, getGroupOrders, deleteGroupOrder, placeImmediateOrder } from '../../api/orders';
 import { useCart } from '../../context/CartContext';
+import { calculatePoints } from '../../components/restaurant/MenuItemCard';
 
 function OrderOptionsModal() {
   const location = useLocation();
@@ -92,6 +93,12 @@ function OrderOptionsModal() {
     return `${hours}h ${minutes % 60}m`;
   };
 
+  const addPointsToUser = (earnedPoints) => {
+  let current = Number(localStorage.getItem("loyalty_points")) || 0;
+  const updated = current + earnedPoints;
+  localStorage.setItem("loyalty_points", String(updated));
+};
+
 
   const handleOrderNow = async () => {
     if (!deliveryLocation.trim()) {
@@ -121,6 +128,8 @@ function OrderOptionsModal() {
 
       // Use the new immediate order API
       await placeImmediateOrder(group.id, items);
+      const reward = calculatePoints(cartTotal, 1, restaurant.reward_multiplier);
+      addPointsToUser(reward);
 
       setShowSuccess(true);
       clearCart();
@@ -170,6 +179,8 @@ function OrderOptionsModal() {
         nextOrderTime: nextOrderTimeUTC,
         items
       });
+      const reward = calculatePoints(cartTotal, maxMembers, restaurant.reward_multiplier);
+      addPointsToUser(reward);
 
       setShowSuccess(true);
       clearCart();
@@ -198,6 +209,10 @@ function OrderOptionsModal() {
           specialInstructions: item.specialInstructions || ''
         }))
       });
+
+      const poolSize = pool.groupData.members.length + 1;
+      const reward = calculatePoints(cartTotal, poolSize, restaurant.reward_multiplier);
+      addPointsToUser(reward);
 
 
       setSelectedPool(pool);
@@ -281,6 +296,9 @@ function OrderOptionsModal() {
                 <span>{estimatedDeliveryTime}</span>
               </div>
               <div style={styles.optionDetails}>
+              <div style={styles.rewardPreview}>
+                ⭐ Earn ~{calculatePoints(cartTotal, 1, restaurant.reward_multiplier)} points
+              </div>
                 <div>Full delivery fee: ${deliveryFee.toFixed(2)}</div>
               </div>
               <button style={styles.optionButton}>
@@ -308,6 +326,12 @@ function OrderOptionsModal() {
                 <span>Save up to 80%</span>
               </div>
               <div style={styles.optionDetails}>
+              <div style={styles.rewardPreview}>
+                ⭐ Potential: ~{calculatePoints(cartTotal, maxMembers, restaurant.reward_multiplier)} points
+              </div>
+              <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                (Assuming {maxMembers} members join)
+              </p>
                 <div>Set time limit for others to join</div>
                 <div>Split delivery costs</div>
               </div>
@@ -548,6 +572,9 @@ function OrderOptionsModal() {
                     </div>
 
                     <div style={styles.poolSavings}>
+                    <div style={styles.poolRewards}>
+                      ⭐ Earn ~{calculatePoints(cartTotal, pool.currentMembers + 1, restaurant.reward_multiplier)} points
+                    </div>
                       <TrendingDown size={18} color="#059669" />
                       <span>Save ${pool.estimatedSavings} on delivery</span>
                     </div>

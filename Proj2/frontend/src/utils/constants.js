@@ -12,6 +12,7 @@ export const RESTAURANTS = [
     location: "Downtown",
     offers: "20% off on orders above $30",
     image: "🍕",
+    reward_multiplier: 1.5,
     items: [
       { id: 1, name: "Margherita Pizza", price: 12.99, description: "Classic tomato and mozzarella" },
       { id: 2, name: "Pepperoni Pizza", price: 14.99, description: "Loaded with pepperoni" },
@@ -24,6 +25,7 @@ export const RESTAURANTS = [
     rating: 4.3,
     location: "Midtown",
     offers: "Free delivery on first order",
+    reward_multiplier: 1.0,
     image: "🍔",
     items: [
       { id: 4, name: "Classic Burger", price: 9.99, description: "Beef patty with lettuce and tomato" },
@@ -37,6 +39,7 @@ export const RESTAURANTS = [
     rating: 4.7,
     location: "Uptown",
     offers: "Buy 2 Get 1 Free on rolls",
+    reward_multiplier: 1.5,
     image: "🍣",
     items: [
       { id: 7, name: "California Roll", price: 11.99, description: "Crab, avocado, cucumber" },
@@ -50,6 +53,7 @@ export const RESTAURANTS = [
     rating: 4.4,
     location: "West Side",
     offers: "Happy Hour: 3-6 PM",
+    reward_multiplier: 1.0,
     image: "🌮",
     items: [
       { id: 10, name: "Beef Tacos", price: 8.99, description: "Three seasoned beef tacos" },

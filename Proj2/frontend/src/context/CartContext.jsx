@@ -1,8 +1,15 @@
 // src/context/CartContext.jsx
 
 import React, { createContext, useContext, useState } from 'react';
+import { calculatePoints } from '../components/restaurant/MenuItemCard';
 
 const CartContext = createContext();
+
+const addPointsToUser = (earnedPoints) => {
+  let current = Number(localStorage.getItem("loyalty_points")) || 0;
+  const updated = current + earnedPoints;
+  localStorage.setItem("loyalty_points", String(updated));
+};
 
 export const useCart = () => {
   const context = useContext(CartContext);
@@ -47,6 +54,10 @@ export const CartProvider = ({ children }) => {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const expectedPoints = cart.reduce(
+    (sum,item) => sum + calculatePoints(item.price*item.quantity,1,item.reward_multiplier),0
+  )
+
   const value = {
     cart,
     addToCart,
@@ -54,6 +65,7 @@ export const CartProvider = ({ children }) => {
     clearCart,
     cartTotal,
     cartCount,
+    expectedPoints,
     showCart,
     setShowCart
   };

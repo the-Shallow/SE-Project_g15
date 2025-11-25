@@ -336,6 +336,7 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
             <MenuItemCard
               key={item.id}
               item={{ ...item, restaurantId: selectedRestaurant.id }}
+              restaurant={selectedRestaurant}
               onAddToCart={handleAddToCart}
             />
           ))}

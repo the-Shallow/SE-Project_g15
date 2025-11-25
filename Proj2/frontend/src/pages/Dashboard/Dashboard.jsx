@@ -12,6 +12,9 @@ import Button from '../../components/common/Button/Button';
 import { RESTAURANTS, PAGES } from '../../utils/constants';
 import CreatePollPage from '../Poll/CreatePollPage';
 import { getUserGroups, getAllGroups, getGroupDetails, joinGroup } from '../../api/groups';
+import RewardsWidget from '../../components/rewards/RewardsWidget';
+
+
 
 import './Dashboard.css';
 
@@ -148,6 +151,7 @@ function Dashboard() {
         {currentPage === PAGES.HOME && !selectedRestaurant && (
           <div>
             <h2 className="page-title">Restaurants Near You</h2>
+            <RewardsWidget points={Number(localStorage.getItem("loyalty_points") || 0)} />
             <div className="restaurant-grid">
               {RESTAURANTS.map(restaurant => (
                 <RestaurantCard
@@ -191,6 +195,7 @@ function Dashboard() {
                 <MenuItemCard
                   key={item.id}
                   item={item}
+                  restaurant={selectedRestaurant}
                   onAddToCart={addToCart}
                 />
               ))}
