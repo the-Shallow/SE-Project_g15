@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './GroupCard.css';
 import Button from '../common/Button/Button';
+import deliveryAPI from '../../api/delivery';
 
 const GroupCard = ({ group, onAction, actionLabel }) => {
   const [timeLeft, setTimeLeft] = useState('');
+  const [etaInfo, setEtaInfo] = useState(null);
   const currentUser = localStorage.getItem('username') || 'Guest';
 
   // Calculate countdown
@@ -41,6 +43,31 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
   };
 
   const status = getStatus();
+
+  // ADD THIS: Fetch AI-powered ETA
+  useEffect(() => {
+    const fetchETA = async () => {
+      try {
+        // Estimate distance based on delivery location or use default
+        const distanceKm = group.distance || 5.0;
+        const numStops = group.members?.length || 1;
+        
+        const eta = await deliveryAPI.predictETAWithRushHour(distanceKm, numStops);
+        setEtaInfo(eta);
+      } catch (error) {
+        console.error('Error fetching ETA:', error);
+        // Don't show error to user, just don't display ETA
+      }
+    };
+
+    // Only fetch ETA if group is not expired
+    if (status === 'Expired' || status === 'Full') {
+      setEtaInfo(null); // Clear ETA for expired/full groups
+    } else {
+      fetchETA();
+    }
+  }, [group.id, group.members?.length, status]);
+
   const statusColors = {
     Open: { bg: '#d1fae5', color: '#059669' },
     'Closing Soon': { bg: '#f2f0c5ff', color: '#ede628ff' },
@@ -96,6 +123,26 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
             }}>
         ⏳ {status === 'Expired' ? 'Time’s up!' : `Time left: ${timeLeft}`}
       </p>
+
+      {/* AI-Powered ETA Display */}
+      {status !== 'Expired' && status !== 'Full' && etaInfo && (
+        <div className="ai-eta-compact">
+          <div className="ai-eta-header">
+            <span className="ai-eta-badge">🤖 Smart ETA</span>
+            {etaInfo.adjusted_for_rush_hour && (
+              <span className="ai-eta-rush-hour">🚦 Rush Hour</span>
+            )}
+          </div>
+          <div className="ai-eta-time">
+            {etaInfo.total_minutes} mins
+          </div>
+          <div className="ai-eta-breakdown">
+            <span>👨‍🍳 {etaInfo.breakdown.prep_time}m</span>
+            <span>🚗 {etaInfo.breakdown.travel_time}m</span>
+            <span>📦 {etaInfo.breakdown.stop_time}m</span>
+          </div>
+        </div>
+      )}
 
       <div className="group-actions">
         <Button variant="primary" onClick={() => onAction(group)}>
