@@ -6,6 +6,7 @@ import deliveryAPI from '../../api/delivery';
 const GroupCard = ({ group, onAction, actionLabel }) => {
   const [timeLeft, setTimeLeft] = useState('');
   const [etaInfo, setEtaInfo] = useState(null);
+  const [clusterInfo, setClusterInfo] = useState(null);
   const currentUser = localStorage.getItem('username') || 'Guest';
 
   // Calculate countdown
@@ -67,6 +68,43 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
       fetchETA();
     }
   }, [group.id, group.members?.length, status]);
+
+  useEffect(() => {
+    const fetchClusterInfo = async () => {
+      try {
+        // For demo, we'll use mock nearby groups
+        // In production, you'd fetch all active groups from your API
+        const mockNearbyGroups = [
+          { lat: 35.7796, lng: -78.6382, group_id: group.id, group_name: group.name },
+          { lat: 35.7806, lng: -78.6392, group_id: 99, group_name: 'Pizza Lovers' },
+          { lat: 35.7816, lng: -78.6402, group_id: 98, group_name: 'Taco Tuesday' }
+        ];
+        
+        const result = await deliveryAPI.findMyCluster(group.id, mockNearbyGroups);
+        
+        if (result.in_cluster) {
+          setClusterInfo(result);
+        }
+      } catch (error) {
+        console.error('Error fetching cluster info:', error);
+      }
+    };
+
+    // Simple mock data for demo - no API call
+    if (status !== 'Expired' && status !== 'Full') {
+      // Show cluster badge on active groups
+      setClusterInfo({
+        in_cluster: true,
+        cluster: {
+          size: 3,
+          radius_km: 1.2
+        }
+      });
+    } else {
+      // Clear cluster info on expired/full groups
+      setClusterInfo(null);
+    }
+  }, [status]);
 
   const statusColors = {
     Open: { bg: '#d1fae5', color: '#059669' },
@@ -141,6 +179,19 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
             <span>🚗 {etaInfo.breakdown.travel_time}m</span>
             <span>📦 {etaInfo.breakdown.stop_time}m</span>
           </div>
+        </div>
+      )}
+
+      {clusterInfo && clusterInfo.in_cluster && (
+        <div className="cluster-badge-container">
+          <span className="cluster-badge">
+            📍 Clustered with {clusterInfo.cluster.size - 1} other {clusterInfo.cluster.size - 1 === 1 ? 'order' : 'orders'}
+          </span>
+          {clusterInfo.cluster.radius_km > 0 && (
+            <span className="cluster-radius">
+              📏 {clusterInfo.cluster.radius_km} km radius
+            </span>
+          )}
         </div>
       )}
 

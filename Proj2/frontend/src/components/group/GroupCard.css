@@ -121,3 +121,33 @@
   display: flex;
   justify-content: space-between;
 }
+
+/* Cluster Badge Styles */
+.cluster-badge-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.cluster-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.cluster-radius {
+  background: #d1fae5;
+  color: #059669;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-block;
+  width: fit-content;
+}
