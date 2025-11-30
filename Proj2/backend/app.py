@@ -3,7 +3,7 @@ from extensions import db, cors, jwt, migrate
 from routes import bp as api_bp
 from config import Config
 import os
-
+from controllers.stats_controller import bp as stats_bp 
 
 def create_app():
     app = Flask(__name__)
@@ -36,6 +36,7 @@ def create_app():
 
     # Register blueprints
     app.register_blueprint(api_bp)
+    app.register_blueprint(stats_bp)
 
     # Initialize database
     with app.app_context():
