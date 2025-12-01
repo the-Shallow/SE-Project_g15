@@ -12,7 +12,15 @@ class Group(db.Model):
     delivery_type = db.Column(db.String(50), nullable=False)
     delivery_location = db.Column(db.String(200), nullable=False)
     max_members = db.Column(db.Integer, default=10)
+
+    # Location and visibility fields
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    visibility = db.Column(db.String(20), default='public')
+    search_radius_km = db.Column(db.Float, default=5.0)
+
     next_order_time = db.Column(db.DateTime(timezone=True), nullable=False)
+
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -39,6 +47,10 @@ class Group(db.Model):
             "deliveryType": self.delivery_type,
             "deliveryLocation": self.delivery_location,
             "maxMembers": self.max_members,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "visibility": self.visibility,
+            "searchRadiusKm": self.search_radius_km,
             "members": [m.username for m in self.members],
             "nextOrderTime": (
                 self.next_order_time.isoformat() if self.next_order_time else None

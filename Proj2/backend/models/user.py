@@ -22,6 +22,11 @@ class User(db.Model):
     city = db.Column(db.String(100), nullable=True)
     state = db.Column(db.String(100), nullable=True)
     pincode = db.Column(db.String(20), nullable=True)
+    
+    # Location fields for proximity discovery
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    location_updated_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, username, email, password):
         self.username = username
