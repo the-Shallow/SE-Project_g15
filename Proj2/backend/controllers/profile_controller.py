@@ -16,13 +16,32 @@ def allowed_file(filename):
 
 
 def get_profile():
-    """Fetch the logged-in user's profile."""
+    """Fetch the logged-in user's profile with stats."""
     claims = get_jwt()
     username = claims.get("username")
     user = User.query.filter_by(username=username).first()
 
     if not user:
         return jsonify({"message": "User not found"}), 404
+
+    # Calculate user statistics
+    total_orders = GroupOrder.query.filter_by(username=username).count()
+    
+    # Count pooled orders (orders in groups with more than 1 member)
+    pooled_orders = 0
+    user_orders = GroupOrder.query.filter_by(username=username).all()
+    
+    for order in user_orders:
+        group = Group.query.get(order.group_id)
+        if group and len(group.members) > 1:
+            pooled_orders += 1
+    
+    # Calculate score (50% total orders, 50% pooled orders)
+    # Max score is 100
+    # Assume 20 total orders = 50 points, 20 pooled orders = 50 points
+    total_orders_score = min((total_orders / 20) * 50, 50)
+    pooled_orders_score = min((pooled_orders / 20) * 50, 50)
+    score = round(total_orders_score + pooled_orders_score)
 
     profile_picture_url = None
     if user.profile_picture:
@@ -44,6 +63,11 @@ def get_profile():
                 "state": user.state,
                 "pincode": user.pincode,
                 "profile_picture": profile_picture_url,
+                "stats": {
+                    "total_orders": total_orders,
+                    "pooled_orders": pooled_orders,
+                    "score": score
+                }
             }
         ),
         200,
