@@ -1,0 +1,22 @@
+/* src/pages/OrderOptions/OrderOptions.css */
+
+/* Most styles are inline in the OrderOptions component */
+/* Add any additional custom styles here if needed */
+
+.order-options-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #e0f2fe, #dbeafe);
+}
+
+rewardPreview: {
+  marginTop: '8px',
+  fontSize: '14px',
+  fontWeight: '600',
+  color: '#d97706'  // warm gold color
+},
+poolRewards: {
+  marginTop: '6px',
+  fontSize: '14px',
+  fontWeight: '600',
+  color: '#c2410c'
+}

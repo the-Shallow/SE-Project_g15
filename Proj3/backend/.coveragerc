@@ -1,0 +1,16 @@
+[run]
+source = .
+omit = 
+    */venv/*
+    */env/*
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */site-packages/*
+
+[report]
+precision = 2
+show_missing = True
+
+[xml]
+output = coverage.xml

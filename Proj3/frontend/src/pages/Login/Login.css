@@ -1,0 +1,82 @@
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  max-width: 400px;
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-form input {
+  margin-bottom: 15px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  
+}
+
+/* Base button */
+.login-form button {
+  padding: 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  background-color: grey;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+/* When form is valid */
+.login-form button.active {
+  background-color: rgb(76, 54, 240);
+  cursor: pointer;
+}
+
+/* Hover only works when active */
+.login-form button.active:hover {
+  background-color: #3700cc;
+  transform: scale(1.02);
+}
+
+/* Disabled state */
+.login-form button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.signup-redirect {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.signup-link {
+  color: rgb(76, 54, 240);
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.signup-link:hover {
+  color: #3700cc;
+  text-decoration: underline;
+}
