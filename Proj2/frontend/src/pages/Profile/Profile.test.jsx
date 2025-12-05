@@ -6,18 +6,18 @@ import { MemoryRouter } from "react-router-dom";
 import { fetchProfile, updateProfile } from "../../api/profile";
 import { getPastOrders } from "../../api/orders";
 
-// 🧠 Mock the API modules
+// Mock the API modules
 jest.mock("../../api/profile");
 jest.mock("../../api/orders");
 
-// 🧭 Mock the navigate hook from react-router-dom
+// Mock the navigate hook from react-router-dom
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
 }));
 
-// 🪄 Mock Button and Navbar components to simplify DOM
+// Mock Button and Navbar components to simplify DOM
 jest.mock("../../components/common/Button/Button", () => (props) => (
   <button onClick={props.onClick}>{props.children}</button>
 ));
@@ -26,19 +26,24 @@ jest.mock("../../components/common/Navbar/Navbar", () => () => (
   <div data-testid="navbar">Mock Navbar</div>
 ));
 
-describe("Profile Page", () => {
+describe("Profile Page with Stats", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test("renders loading state and then profile info", async () => {
-    // Mock profile and orders API responses
+  test("renders loading state and then profile info with stats", async () => {
+    // Mock profile with stats
     fetchProfile.mockResolvedValue({
       username: "testuser",
       email: "test@example.com",
       city: "TestCity",
       state: "TS",
       pincode: "12345",
+      stats: {
+        total_orders: 10,
+        pooled_orders: 7,
+        score: 42
+      }
     });
     getPastOrders.mockResolvedValue([]);
 
@@ -56,9 +61,158 @@ describe("Profile Page", () => {
       expect(screen.getByText("testuser")).toBeInTheDocument()
     );
 
-    // Verify key fields
-    expect(screen.getByText("test@example.com")).toBeInTheDocument();
-    expect(screen.getByText(/TestCity/i)).toBeInTheDocument();
+    // Verify stats section exists
+    expect(screen.getByText(/Your Food Journey/i)).toBeInTheDocument();
+  });
+
+  test("displays total orders correctly", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "testuser",
+      email: "test@example.com",
+      stats: {
+        total_orders: 15,
+        pooled_orders: 10,
+        score: 62
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("testuser"));
+
+    // Check total orders display
+    expect(screen.getByText("Total Orders")).toBeInTheDocument();
+    expect(screen.getByText("15")).toBeInTheDocument();
+  });
+
+  test("displays achievements with pooled orders", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "testuser",
+      email: "test@example.com",
+      stats: {
+        total_orders: 20,
+        pooled_orders: 12,
+        score: 80
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("testuser"));
+
+    // Check achievements section
+    expect(screen.getByText(/🏆 Achievements/i)).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText(/Yay!! You saved money/i)).toBeInTheDocument();
+  });
+
+  test("displays leaderboard score with progress bar", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "testuser",
+      email: "test@example.com",
+      stats: {
+        total_orders: 18,
+        pooled_orders: 15,
+        score: 82
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("testuser"));
+
+    // Check leaderboard section
+    expect(screen.getByText(/🏅 Leaderboard Score/i)).toBeInTheDocument();
+    expect(screen.getByText(/82\/100/i)).toBeInTheDocument();
+    expect(screen.getByText(/Your current score is 82\/100/i)).toBeInTheDocument();
+  });
+
+  test("displays celebration message when score is 100", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "testuser",
+      email: "test@example.com",
+      stats: {
+        total_orders: 20,
+        pooled_orders: 20,
+        score: 100
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("testuser"));
+
+    // Check celebration message
+    expect(screen.getByText(/Yay!! Your next order is FREE!/i)).toBeInTheDocument();
+  });
+
+  test("displays correct message when no pooled orders", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "testuser",
+      email: "test@example.com",
+      stats: {
+        total_orders: 5,
+        pooled_orders: 0,
+        score: 12
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("testuser"));
+
+    // Check message for no pooled orders
+    expect(screen.getByText(/Start using Pool Orders to save money/i)).toBeInTheDocument();
+  });
+
+  test("score bar width reflects actual score", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "testuser",
+      email: "test@example.com",
+      stats: {
+        total_orders: 10,
+        pooled_orders: 8,
+        score: 45
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("testuser"));
+
+    // Find score bar and check width
+    const scoreBar = screen.getByText(/45\/100/i).parentElement;
+    expect(scoreBar).toHaveStyle({ width: '45%' });
   });
 
   test("allows editing and saving profile", async () => {
@@ -66,6 +220,11 @@ describe("Profile Page", () => {
       username: "testuser",
       email: "test@example.com",
       city: "OldCity",
+      stats: {
+        total_orders: 5,
+        pooled_orders: 3,
+        score: 20
+      }
     });
     getPastOrders.mockResolvedValue([]);
     updateProfile.mockResolvedValue({ profile_picture: "updated.png" });
@@ -93,6 +252,11 @@ describe("Profile Page", () => {
     fetchProfile.mockResolvedValue({
       username: "testuser",
       email: "test@example.com",
+      stats: {
+        total_orders: 2,
+        pooled_orders: 1,
+        score: 7
+      }
     });
 
     getPastOrders.mockResolvedValue([
@@ -103,7 +267,6 @@ describe("Profile Page", () => {
         restaurantId: 1,
         items: [
           { id: 1, menuItemId: 1, quantity: 2 },
-          { id: 2, menuItemId: 2, quantity: 1 },
         ],
       },
     ]);
@@ -129,6 +292,11 @@ describe("Profile Page", () => {
     fetchProfile.mockResolvedValue({
       username: "testuser",
       email: "test@example.com",
+      stats: {
+        total_orders: 0,
+        pooled_orders: 0,
+        score: 0
+      }
     });
     getPastOrders.mockResolvedValue([]);
 
@@ -149,5 +317,79 @@ describe("Profile Page", () => {
     expect(removeItemSpy).toHaveBeenCalledWith("token");
     expect(window.alert).toHaveBeenCalledWith("You have been logged out.");
     expect(mockNavigate).toHaveBeenCalledWith("/login");
+  });
+
+  test("handles zero stats gracefully", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "newuser",
+      email: "new@example.com",
+      stats: {
+        total_orders: 0,
+        pooled_orders: 0,
+        score: 0
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("newuser"));
+
+    // Check that zero values are displayed
+    expect(screen.getByText("Total Orders")).toBeInTheDocument();
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByText(/Start using Pool Orders/i)).toBeInTheDocument();
+  });
+
+  test("score calculation message is displayed", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "testuser",
+      email: "test@example.com",
+      stats: {
+        total_orders: 10,
+        pooled_orders: 5,
+        score: 37
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("testuser"));
+
+    // Check that score calculation explanation is shown
+    expect(screen.getByText(/50% based on total orders, 50% based on pool orders/i)).toBeInTheDocument();
+  });
+
+  test("displays correct remaining points to reach 100", async () => {
+    fetchProfile.mockResolvedValue({
+      username: "testuser",
+      email: "test@example.com",
+      stats: {
+        total_orders: 12,
+        pooled_orders: 8,
+        score: 50
+      }
+    });
+    getPastOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => screen.getByText("testuser"));
+
+    // Check remaining points message
+    expect(screen.getByText(/Achieve 50 more points to get a FREE order!/i)).toBeInTheDocument();
   });
 });

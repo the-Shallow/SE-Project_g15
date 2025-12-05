@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchProfile, updateProfile } from "../../api/profile";
 import Navbar from "../../components/common/Navbar/Navbar";
-import { useNavigate } from "react-router-dom"; // ✅ for redirect after logout
+import { useNavigate } from "react-router-dom";
 import "./Profile.css";
 import { getPastOrders } from "../../api/orders";
 import { RESTAURANTS } from "../../utils/constants";
@@ -16,8 +16,13 @@ const Profile = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [ordersOpen, setOrdersOpen] = useState(false);
+  const [stats, setStats] = useState({
+    total_orders: 0,
+    pooled_orders: 0,
+    score: 0
+  });
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -25,6 +30,11 @@ const Profile = () => {
         const data = await fetchProfile();
         setProfile(data);
         setForm(data);
+        
+        // Set stats from profile
+        if (data.stats) {
+          setStats(data.stats);
+        }
 
         // Fetch past orders
         const pastOrders = await getPastOrders();
@@ -62,7 +72,7 @@ const Profile = () => {
     try {
       const formData = new FormData();
       for (const key in form) {
-        if (form[key] !== undefined && form[key] !== null) {
+        if (form[key] !== undefined && form[key] !== null && key !== 'stats') {
           formData.append(key, form[key]);
         }
       }
@@ -84,7 +94,6 @@ const Profile = () => {
     }
   };
 
-  // ✅ Logout logic
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
@@ -92,17 +101,31 @@ const Profile = () => {
     navigate("/login");
   };
 
+  // Calculate percentage for score bar
+  const getScorePercentage = () => {
+    return Math.min((stats.score / 100) * 100, 100);
+  };
+
+  // Get leaderboard message
+  const getLeaderboardMessage = () => {
+    if (stats.score >= 100) {
+      return "🎉 Yay!! Your next order is FREE! Congratulations on achieving the perfect score!";
+    } else {
+      const remaining = 100 - stats.score;
+      return `Your current score is ${stats.score}/100. Achieve ${remaining} more points to get a FREE order!`;
+    }
+  };
+
   if (!profile) return <div className="profile">Loading profile...</div>;
 
   return (
     <>
-      {/* Navbar at top */}
       <Navbar currentPage="profile" />
 
       <div className="profile-container">
         <div className="profile-card">
           <img
-            src={previewUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+            src={previewUrl || profile.profile_picture || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
             alt="Profile"
             className="profile-photo"
           />
@@ -115,6 +138,58 @@ const Profile = () => {
 
           <hr />
 
+          {/* Statistics Section */}
+          <div className="stats-section">
+            <h3>📊 Your Food Journey</h3>
+            
+            <div className="stats-grid">
+              {/* Total Orders */}
+              <div className="stat-card">
+                <h4>Total Orders</h4>
+                <div className="stat-value">{stats.total_orders}</div>
+                <p className="stat-description">
+                  You've placed {stats.total_orders} order{stats.total_orders !== 1 ? 's' : ''} so far. Keep ordering!
+                </p>
+              </div>
+
+              {/* Achievements - Pooled Orders */}
+              <div className="stat-card">
+                <h4>🏆 Achievements</h4>
+                <div className="stat-value">{stats.pooled_orders}</div>
+                <div className="achievement-badge">
+                  🎯 Pool Orders
+                </div>
+                <p className="stat-description">
+                  {stats.pooled_orders > 0 
+                    ? `🎉 Yay!! You saved money by using the Pool Order Feature ${stats.pooled_orders} time${stats.pooled_orders !== 1 ? 's' : ''}!`
+                    : "Start using Pool Orders to save money and unlock achievements!"}
+                </p>
+              </div>
+            </div>
+
+            {/* Leaderboard Score */}
+            <div className="leaderboard-section">
+              <h4>🏅 Leaderboard Score</h4>
+              <div className="score-bar-container">
+                <div 
+                  className="score-bar" 
+                  style={{ width: `${getScorePercentage()}%` }}
+                >
+                  {stats.score}/100
+                </div>
+              </div>
+              <p className={`leaderboard-message ${stats.score >= 100 ? 'celebration' : ''}`}>
+                {getLeaderboardMessage()}
+              </p>
+              <p className="stat-description" style={{ marginTop: '12px', fontSize: '12px' }}>
+                💡 Score calculation: 50% based on total orders, 50% based on pool orders (max 20 orders each for full points)
+              </p>
+            </div>
+          </div>
+
+          <hr />
+
+          {/* Profile Edit Section */}
           {editing ? (
             <div className="profile-form">
               <input
@@ -153,10 +228,10 @@ const Profile = () => {
           )}
 
           <hr />
+
           {/* Collapsible Past Orders */}
           <h3
             className="collapsible-header"
-            style={{ cursor: "pointer" }}
             onClick={() => setOrdersOpen(!ordersOpen)}
           >
             🧾 Past Orders {ordersOpen ? "▲" : "▼"}
@@ -187,7 +262,7 @@ const Profile = () => {
             </div>
           )}
           
-          {/* ✅ Logout Button */}
+          {/* Logout Button */}
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>

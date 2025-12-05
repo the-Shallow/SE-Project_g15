@@ -11,7 +11,7 @@
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
   text-align: center;
 }
@@ -41,6 +41,123 @@
   padding: 10px 16px;
   border-radius: 5px;
   cursor: pointer;
+}
+
+/* Stats Section */
+.stats-section {
+  margin: 30px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+}
+
+.stats-section h3 {
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 16px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.stat-description {
+  font-size: 13px;
+  opacity: 0.8;
+  line-height: 1.4;
+  margin-top: 8px;
+}
+
+/* Achievement Badge */
+.achievement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 215, 0, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid rgba(255, 215, 0, 0.5);
+}
+
+/* Leaderboard Section */
+.leaderboard-section {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 20px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.leaderboard-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+.score-bar-container {
+  background: rgba(255, 255, 255, 0.2);
+  height: 30px;
+  border-radius: 15px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.score-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  transition: width 0.5s ease;
+}
+
+.leaderboard-message {
+  font-size: 14px;
+  opacity: 0.9;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+
+.leaderboard-message.celebration {
+  font-size: 16px;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* Past Orders Section */
@@ -111,6 +228,7 @@
 .order-item-qty {
   color: #6b7280;
 }
+
 .logout-button {
   background-color: #dc3545;
   color: white;
@@ -126,4 +244,14 @@
 
 .logout-button:hover {
   background-color: #b02a37;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  margin: 20px 0 10px 0;
+}
+
+.collapsible-header:hover {
+  opacity: 0.8;
 }
