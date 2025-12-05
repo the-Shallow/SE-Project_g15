@@ -4,6 +4,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { RewardsProvider } from './context/RewardsContext';
+import { LocationProvider } from './context/LocationContext';
 import AppRoutes from './routes/AppRoutes';
 import './App.css';
 
@@ -12,7 +13,9 @@ function App() {
     <BrowserRouter>
       <RewardsProvider>
         <CartProvider>
-          <AppRoutes />
+          <LocationProvider>
+            <AppRoutes />
+          </LocationProvider>
         </CartProvider>
       </RewardsProvider>
     </BrowserRouter>

@@ -27,6 +27,11 @@ class User(db.Model):
     tier = db.Column(db.String(20), default="Bronze")
     streak_count = db.Column(db.Integer,default=0)
     last_order_date = db.Column(db.DateTime)
+    
+    # Location fields for proximity discovery
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    location_updated_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, username, email, password):
         self.username = username

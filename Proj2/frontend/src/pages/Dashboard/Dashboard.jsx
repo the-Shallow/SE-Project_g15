@@ -10,6 +10,7 @@ import GroupCard from '../../components/group/GroupCard';
 import EditGroupPage from '../EditGroup/EditGroupPage';
 import Button from '../../components/common/Button/Button';
 import { RESTAURANTS, PAGES } from '../../utils/constants';
+import LocationPermission from '../../components/discovery/LocationPermission';
 import CreatePollPage from '../Poll/CreatePollPage';
 import { getUserGroups, getAllGroups, getGroupDetails, joinGroup } from '../../api/groups';
 import RewardsWidget from '../../components/rewards/RewardsWidget';
@@ -147,6 +148,7 @@ function Dashboard() {
       <Navbar currentPage={currentPage} onPageChange={handlePageChange} />
 
       <div className="main-content">
+        <LocationPermission />
         {/* Home Page - Restaurant List */}
         {currentPage === PAGES.HOME && !selectedRestaurant && (
           <div>
