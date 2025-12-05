@@ -9,6 +9,9 @@ import OrderOptions from '../pages/OrderOptions/OrderOptions';
 import GroupsPage from '../components/group/GroupPage';
 import GroupDetailPage from '../components/group/GroupDetail';
 import Profile from '../pages/Profile/Profile';
+import RewardsPage from '../pages/Rewards/RewardsPage';
+
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -21,6 +24,7 @@ const AppRoutes = () => {
       <Route path="/groups/:id" element={<GroupDetailPage />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="/rewards" element={<RewardsPage />} />
     </Routes>
   );
 };

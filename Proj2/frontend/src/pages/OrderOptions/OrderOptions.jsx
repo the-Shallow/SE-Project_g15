@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, Users, Zap, MapPin, TrendingDown, Leaf } from 'lucide-react';
 import { createGroup, getAllGroups, joinGroup } from '../../api/groups';
 import { placeGroupOrder, getGroupOrders, deleteGroupOrder, placeImmediateOrder } from '../../api/orders';
+import { useRewards } from '../../context/RewardsContext';
+import { quotePointsRedemption , getRewardSummary} from '../../api/rewards';
 import { useCart } from '../../context/CartContext';
 import { calculatePoints } from '../../components/restaurant/MenuItemCard';
 
@@ -27,6 +29,10 @@ function OrderOptionsModal() {
   const currentUser = localStorage.getItem('username') || "Guest";
   const deliveryFee = 5.99;
   const estimatedDeliveryTime = "30-40 min";
+  const { rewards, refreshRewards } = useRewards();
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [couponCode, setCouponCode] = useState('');
+  const [finalTotal, setFinalTotal] = useState(cartTotal + deliveryFee);
 
   // Fetch nearby pools when user selects "Join Pool"
   useEffect(() => {
@@ -100,6 +106,62 @@ function OrderOptionsModal() {
 };
 
 
+const handlePreviewRedemption = async () => {
+  const subtotalCents = Math.round((cartTotal + deliveryFee) * 100);
+
+  let newTotal = cartTotal + deliveryFee;
+  let discountDetails = [];
+
+  try {
+    // 🔹 Redeem Points preview
+    if (redeemPoints >= 200) {
+      const data = await quotePointsRedemption(redeemPoints, subtotalCents);
+      const discount = data.credit_value_cents / 100;
+      newTotal -= discount;
+      discountDetails.push(`-${discount.toFixed(2)} via points`);
+    }
+
+    // 🔹 Coupon preview (if entered)
+    if (couponCode.trim()) {
+      // const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/rewards/summary`, {
+      //   headers: {
+      //     Authorization: `Bearer ${localStorage.getItem("token")}`,
+      //   },
+      // });
+      const summary = await getRewardSummary();
+      // const summary = await res.json();
+      const coupon = summary.coupons.find(c => c.code === couponCode);
+
+      if (coupon && !coupon.used) {
+        let couponDiscount = 0;
+        if (coupon.type === "percent_off") {
+          couponDiscount = newTotal * (coupon.value / 100);
+        } else if (coupon.type === "flat") {
+          couponDiscount = coupon.value;
+        }
+        newTotal -= couponDiscount;
+        discountDetails.push(`-${couponDiscount.toFixed(2)} via coupon`);
+      } else {
+        alert("⚠️ Invalid or expired coupon code.");
+      }
+    }
+
+    // 🔹 Clamp total and update UI
+    newTotal = Math.max(newTotal, 0);
+    setFinalTotal(newTotal);
+
+    if (discountDetails.length > 0)
+      alert(`Applied: ${discountDetails.join(" + ")}. New Total: $${newTotal.toFixed(2)}`);
+    else
+      alert("No valid discounts applied.");
+  } catch (err) {
+    console.error("Discount preview failed:", err);
+    alert("Failed to preview discount.");
+  }
+};
+
+
+
   const handleOrderNow = async () => {
     if (!deliveryLocation.trim()) {
       setError('Please enter a delivery location');
@@ -127,7 +189,16 @@ function OrderOptionsModal() {
       }));
 
       // Use the new immediate order API
-      await placeImmediateOrder(group.id, items);
+      // await placeImmediateOrder(group.id, items);
+      await placeImmediateOrder(group.id, {
+        items,
+        redeemPoints,
+        coupon_code: couponCode || null
+      });
+      await refreshRewards();
+      setRedeemPoints(0);
+      setCouponCode('');
+      setFinalTotal(cartTotal + deliveryFee);
       const reward = calculatePoints(cartTotal, 1, restaurant.reward_multiplier);
       addPointsToUser(reward);
 
@@ -175,10 +246,20 @@ function OrderOptionsModal() {
       const newGroup = await createGroup(groupData);
 
       // Place organizer's order using the same `nextOrderTime`
+      // await placeGroupOrder(newGroup.id, {
+      //   nextOrderTime: nextOrderTimeUTC,
+      //   items
+      // });
       await placeGroupOrder(newGroup.id, {
         nextOrderTime: nextOrderTimeUTC,
-        items
+        items,
+        redeemPoints,
+        coupon_code: couponCode || null
       });
+      await refreshRewards();
+      setRedeemPoints(0);
+      setCouponCode('');
+      setFinalTotal(cartTotal + deliveryFee);
       const reward = calculatePoints(cartTotal, maxMembers, restaurant.reward_multiplier);
       addPointsToUser(reward);
 
@@ -406,6 +487,57 @@ function OrderOptionsModal() {
                 />
               </div>
 
+              {/* Reward Options */}
+<div style={{ marginTop: '20px', textAlign: 'left' }}>
+  <h4 style={{ fontWeight: '600', color: '#1f2937' }}>💎 Use Your Rewards</h4>
+  <p style={{ color: '#6b7280' }}>Available Points: {rewards.points}</p>
+
+  <label style={{ display: 'block', marginTop: '8px' }}>Redeem Points:</label>
+  <input
+    type="number"
+    min="0"
+    max={rewards.points}
+    value={redeemPoints}
+    onChange={(e) => setRedeemPoints(Number(e.target.value))}
+    style={styles.input}
+    placeholder="e.g., 500"
+  />
+
+  <label style={{ display: 'block', marginTop: '12px' }}>Coupon Code:</label>
+  <input
+    type="text"
+    value={couponCode}
+    onChange={(e) => setCouponCode(e.target.value)}
+    placeholder="Optional"
+    style={styles.input}
+  />
+
+  <button
+    onClick={handlePreviewRedemption}
+    style={{
+      marginTop: '6px',
+      background: '#e0f2fe',
+      border: '1px solid #2563eb',
+      padding: '8px 12px',
+      borderRadius: '6px',
+      cursor: 'pointer'
+    }}
+  >
+    Preview Discount
+  </button>
+
+  {finalTotal !== cartTotal + deliveryFee && (
+  <p style={{ marginTop: '12px', fontWeight: '600', color: '#2563eb' }}>
+    🎉 New Total After Discounts: ${finalTotal.toFixed(2)}
+  </p>
+)}
+
+  <p style={{ marginTop: '12px', fontWeight: '600', color: '#2563eb' }}>
+    Final Payable: ${finalTotal.toFixed(2)}
+  </p>
+</div>
+
+
 
               <button
                 style={styles.confirmButton}
@@ -467,6 +599,57 @@ function OrderOptionsModal() {
                   </div>
                 </div>
               </div>
+
+              {/* Reward Options */}
+<div style={{ marginTop: '20px', textAlign: 'left' }}>
+  <h4 style={{ fontWeight: '600', color: '#1f2937' }}>💎 Use Your Rewards</h4>
+  <p style={{ color: '#6b7280' }}>Available Points: {rewards.points}</p>
+
+  <label style={{ display: 'block', marginTop: '8px' }}>Redeem Points:</label>
+  <input
+    type="number"
+    min="0"
+    max={rewards.points}
+    value={redeemPoints}
+    onChange={(e) => setRedeemPoints(Number(e.target.value))}
+    style={styles.input}
+    placeholder="e.g., 500"
+  />
+
+  <label style={{ display: 'block', marginTop: '12px' }}>Coupon Code:</label>
+  <input
+    type="text"
+    value={couponCode}
+    onChange={(e) => setCouponCode(e.target.value)}
+    placeholder="Optional"
+    style={styles.input}
+  />
+
+  <button
+    onClick={handlePreviewRedemption}
+    style={{
+      marginTop: '6px',
+      background: '#e0f2fe',
+      border: '1px solid #2563eb',
+      padding: '8px 12px',
+      borderRadius: '6px',
+      cursor: 'pointer'
+    }}
+  >
+    Preview Discount
+  </button>
+
+  {finalTotal !== cartTotal + deliveryFee && (
+  <p style={{ marginTop: '12px', fontWeight: '600', color: '#2563eb' }}>
+    🎉 New Total After Discounts: ${finalTotal.toFixed(2)}
+  </p>
+)}
+
+  <p style={{ marginTop: '12px', fontWeight: '600', color: '#2563eb' }}>
+    Final Payable: ${finalTotal.toFixed(2)}
+  </p>
+</div>
+
 
               <div style={styles.configSection}>
                 <label style={styles.label}>
@@ -570,6 +753,57 @@ function OrderOptionsModal() {
                       <MapPin size={14} />
                       <span>{pool.deliveryLocation}</span>
                     </div>
+
+                    {/* Reward Options */}
+<div style={{ marginTop: '20px', textAlign: 'left' }}>
+  <h4 style={{ fontWeight: '600', color: '#1f2937' }}>💎 Use Your Rewards</h4>
+  <p style={{ color: '#6b7280' }}>Available Points: {rewards.points}</p>
+
+  <label style={{ display: 'block', marginTop: '8px' }}>Redeem Points:</label>
+  <input
+    type="number"
+    min="0"
+    max={rewards.points}
+    value={redeemPoints}
+    onChange={(e) => setRedeemPoints(Number(e.target.value))}
+    style={styles.input}
+    placeholder="e.g., 500"
+  />
+
+  <label style={{ display: 'block', marginTop: '12px' }}>Coupon Code:</label>
+  <input
+    type="text"
+    value={couponCode}
+    onChange={(e) => setCouponCode(e.target.value)}
+    placeholder="Optional"
+    style={styles.input}
+  />
+
+  <button
+    onClick={handlePreviewRedemption}
+    style={{
+      marginTop: '6px',
+      background: '#e0f2fe',
+      border: '1px solid #2563eb',
+      padding: '8px 12px',
+      borderRadius: '6px',
+      cursor: 'pointer'
+    }}
+  >
+    Preview Discount
+  </button>
+
+  {finalTotal !== cartTotal + deliveryFee && (
+  <p style={{ marginTop: '12px', fontWeight: '600', color: '#2563eb' }}>
+    🎉 New Total After Discounts: ${finalTotal.toFixed(2)}
+  </p>
+)}
+
+  <p style={{ marginTop: '12px', fontWeight: '600', color: '#2563eb' }}>
+    Final Payable: ${finalTotal.toFixed(2)}
+  </p>
+</div>
+
 
                     <div style={styles.poolSavings}>
                     <div style={styles.poolRewards}>

@@ -3,11 +3,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../../context/CartContext';
+import { useRewards } from '../../../context/RewardsContext';
 import './Navbar.css';
 
 const Navbar = ({ currentPage, onPageChange }) => {
   const navigate = useNavigate();
   const { cartCount, setShowCart } = useCart();
+  const { rewards } = useRewards();
 
   // helper to handle clicks universally
   const handleNavClick = (page) => {
@@ -45,6 +47,12 @@ const Navbar = ({ currentPage, onPageChange }) => {
             className={`nav-button ${currentPage === 'findgroups' ? 'active' : ''}`}
           >
             🔍 Find Groups
+          </button>
+          <button
+            onClick={() => navigate('/rewards')}
+            className="nav-button"
+          >
+            💎 Rewards
           </button>
         </div>
         <div className="navbar-right">

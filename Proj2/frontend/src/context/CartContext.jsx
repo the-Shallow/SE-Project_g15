@@ -24,6 +24,7 @@ export const CartProvider = ({ children }) => {
   const [showCart, setShowCart] = useState(false);
 
   const addToCart = (item) => {
+    console.log("Adding to cart:", item);
     const existing = cart.find(cartItem => cartItem.id === item.id);
     if (existing) {
       setCart(cart.map(cartItem => 

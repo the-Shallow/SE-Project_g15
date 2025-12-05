@@ -1,5 +1,5 @@
 from extensions import db, bcrypt
-
+from datetime import datetime
 # db = SQLAlchemy()
 # bcrypt = Bcrypt()
 
@@ -24,6 +24,10 @@ class User(db.Model):
     pincode = db.Column(db.String(20), nullable=True)
     loyalty_points = db.Column(db.Integer, default=0)
 
+    tier = db.Column(db.String(20), default="Bronze")
+    streak_count = db.Column(db.Integer,default=0)
+    last_order_date = db.Column(db.DateTime)
+
     def __init__(self, username, email, password):
         self.username = username
         self.email = email
@@ -31,3 +35,23 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
+
+    def update_streak(self):
+        now = datetime.utcnow().date()
+        if not self.last_order_date:
+            self.streak_count = 1
+        else:
+            delta = (now - self.last_order_date.date()).days
+            if delta == 1:
+                self.streak_count += 1
+            elif delta > 1:
+                self.streak_count = 1
+        self.last_order_date = datetime.utcnow()
+
+    def  tier_multiplier(self):
+        tiers = {
+            "Bronze":1.00,
+            "Silver":1.10,
+            "Gold":1.20
+        }
+        return tiers.get(self.tier,1.00)

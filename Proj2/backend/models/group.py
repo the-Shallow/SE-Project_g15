@@ -31,6 +31,9 @@ class Group(db.Model):
         "Poll", backref="group", lazy=True, cascade="all, delete-orphan"
     )
 
+    total_cents = db.Column(db.Integer,default=0)
+    goal_reach = db.Column(db.Boolean, default=False)
+
     def to_dict(self):
         return {
             "id": self.id,

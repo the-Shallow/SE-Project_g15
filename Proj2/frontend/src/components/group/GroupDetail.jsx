@@ -513,7 +513,7 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
         <Button
           variant="success"
           onClick={handlePlaceOrder}
-          disabled={getStatus() === 'Expired' || getStatus() === 'Full'}>
+          disabled={getStatus() === 'Expired'}>
           Place / Update Order
         </Button>
 

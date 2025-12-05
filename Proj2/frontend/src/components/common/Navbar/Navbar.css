@@ -122,3 +122,18 @@
     font-size: 20px;
   }
 }
+
+.points-badge {
+  background: linear-gradient(90deg, #ffd700, #ffbf00);
+  color: #222;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.points-badge:hover {
+  transform: scale(1.1);
+}

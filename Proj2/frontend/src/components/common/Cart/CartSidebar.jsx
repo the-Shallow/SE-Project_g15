@@ -10,8 +10,14 @@ const CartSidebar = ({ selectedRestaurant }) => {
   const navigate = useNavigate();
   const { cart, cartTotal, addToCart, removeFromCart, showCart, setShowCart } = useCart();
 
+  const effectiveRestaurant =
+  selectedRestaurant ||
+  (cart.length > 0
+    ? { id: cart[0].restaurantId, name: cart[0].restaurantName || "Unknown" }
+    : null);
+
   const handleCheckout = () => {
-    if (!selectedRestaurant) {
+    if (!effectiveRestaurant) {
       alert('Please select a restaurant first!');
       return;
     }
@@ -24,7 +30,7 @@ const CartSidebar = ({ selectedRestaurant }) => {
       state: {
         cart,
         cartTotal,
-        restaurant: selectedRestaurant
+        restaurant: effectiveRestaurant
       }
     });
   };
@@ -84,7 +90,7 @@ const CartSidebar = ({ selectedRestaurant }) => {
                 size="large"
                 fullWidth
                 onClick={handleCheckout}
-                disabled={!selectedRestaurant || cart.length === 0}
+                disabled={!effectiveRestaurant || cart.length === 0}
               >
                 Checkout
               </Button>
