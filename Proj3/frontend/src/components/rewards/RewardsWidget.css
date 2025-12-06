@@ -1,0 +1,54 @@
+.rewards-widget {
+  background: white;
+  border: 1px solid #eef0f3;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+  margin-bottom: 16px;
+  max-width: 360px;
+}
+
+.rewards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.rewards-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.tier-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.tier-bronze { background: #fef3c7; color: #92400e; }
+.tier-silver { background: #e5e7eb; color: #374151; }
+.tier-gold { background: #fde68a; color: #78350f; }
+.tier-platinum { background: #dbeafe; color: #1d4ed8; }
+
+.rewards-body { display: grid; gap: 6px; }
+
+.rewards-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.rewards-strong {
+  font-weight: 700;
+  color: #111827;
+}
+
+.rewards-next {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}

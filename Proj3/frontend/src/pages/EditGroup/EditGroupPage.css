@@ -1,0 +1,29 @@
+.edit-group-container {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  max-width: 500px;
+  margin: auto;
+}
+
+.edit-group-container label {
+  display: block;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+.edit-group-container input,
+.edit-group-container select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.edit-group-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
