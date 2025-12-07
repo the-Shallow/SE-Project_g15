@@ -141,7 +141,7 @@ def add_or_update_order(group_id):
         menu_item = MenuItem.query.get(item["menuItemId"])
         if not menu_item:
             return jsonify({
-                "error": f"Menu item with ID {item["menuItemId"]} not found"
+                "error": f"Menu item with ID {item['menuItemId']} not found"
             }), 404
         quantity = item.get("quantity",1)
         total_cents += int(menu_item.price * 100 * quantity)
@@ -307,7 +307,7 @@ def place_immediate_order(group_id):
         menu_item = MenuItem.query.get(item["menuItemId"])
         if not menu_item:
             return jsonify({
-                "error":f"Menu item with ID {item["menuItemId"]} not found"
+                "error":f"Menu item with ID {item['menuItemId']} not found"
             }) , 404
         
         total_cents += int(menu_item.price * 100 * quantity)
