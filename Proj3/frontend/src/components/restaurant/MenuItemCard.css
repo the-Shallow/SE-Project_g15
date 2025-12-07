@@ -1,0 +1,49 @@
+/* src/components/restaurant/MenuItemCard.css */
+
+.menu-item {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  border-color: #667eea;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15);
+}
+
+.menu-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.menu-item-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.menu-item-price {
+  font-size: 20px;
+  font-weight: bold;
+  color: #059669;
+}
+
+.menu-item-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.expected-points {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #d4a100;
+  font-weight: 600;
+}
