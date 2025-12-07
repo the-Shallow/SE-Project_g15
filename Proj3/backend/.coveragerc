@@ -1,5 +1,5 @@
 [run]
-source = .
+source = Proj3
 omit = 
     */venv/*
     */env/*
