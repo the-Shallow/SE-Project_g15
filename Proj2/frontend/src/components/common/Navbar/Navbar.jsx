@@ -49,8 +49,8 @@ const Navbar = ({ currentPage, onPageChange }) => {
             🔍 Find Groups
           </button>
           <button
-            onClick={() => navigate('/rewards')}
-            className="nav-button"
+           onClick={() => handleNavClick('rewards')}
+            className={`nav-button ${currentPage === 'rewards' ? 'active' : ''}`}
           >
             💎 Rewards
           </button>
