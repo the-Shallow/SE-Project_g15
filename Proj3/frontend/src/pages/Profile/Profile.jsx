@@ -174,6 +174,7 @@ const Profile = () => {
                 <div 
                   className="score-bar" 
                   style={{ width: `${getScorePercentage()}%` }}
+                  data-testid="score-bar" 
                 >
                   {stats.score}/100
                 </div>
