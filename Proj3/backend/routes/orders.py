@@ -23,9 +23,11 @@ def calculate_points(total_price: float, pool_size: int = 1, multiplier: float =
 def evaluate_group_goal(group):
     if group.goal_reach:
         return
+
+    achieved = None
     
     if group.total_cents >= 10000:
-        reward_type = "coupon"
+        achieved = {"type": "coupon", "milestone": 10000, "reward": "10% off coupon"}
         reward_value = 10
         for member in group.members:
             coupon = Coupon(
@@ -41,12 +43,12 @@ def evaluate_group_goal(group):
                 type="bonus",
                 points=0,
                 amount_cents=0,
-                meta={"reason":"group_goal","coupon_code":coupon.code}
+                meta={"reason":"group_goal","coupon_code":coupon.code,"reward_type":"coupon","milestone":10000,"group_name":group.name}
             ))
         group.goal_reach = True
 
     elif group.total_cents >= 5000:
-        reward_type = "points"
+        achieved = {"type": "points", "milestone": 5000, "reward": "+100 points"}
         reward_value = 100
         for member in group.members:
             user = member.user
@@ -56,12 +58,14 @@ def evaluate_group_goal(group):
                 type="bonus",
                 points=reward_value,
                 amount_cents=0,
-                meta={"reason":"group_goal_points"}
+                meta={"reason":"group_goal_points","group_name":group.name,"milestone":5000,"reward_type":"points"}
             ))
         group.goal_reach = True
     
-    db.session.add(group)
-    db.session.commit()
+    if achieved:
+        db.session.add(group)
+        db.session.commit()
+    return achieved
 
 def parse_iso_utc(dt_str: str):
     """Parse ISO datetime string, ensure UTC-aware."""
@@ -230,7 +234,7 @@ def add_or_update_order(group_id):
     group.total_cents += total_cents
     db.session.add(group)
     db.session.commit()
-    evaluate_group_goal(group)
+    goal_achievement = evaluate_group_goal(group)
 
 
     return jsonify({
@@ -239,7 +243,9 @@ def add_or_update_order(group_id):
         "earned_points":earned_points,
         "redeemed_points":redeem_points,
         "new_balance":user.loyalty_points,
-        "pool_size":pool_size
+        "pool_size":pool_size,
+        "group_goal_achieved":bool(goal_achievement),
+        "group_details":goal_achievement
     }), 201
 
 
@@ -392,7 +398,7 @@ def place_immediate_order(group_id):
     group.total_cents += total_cents
     db.session.add(group)
     db.session.commit()
-    evaluate_group_goal(group)
+    goal_achievement = evaluate_group_goal(group)
 
 
     return jsonify({
@@ -400,5 +406,7 @@ def place_immediate_order(group_id):
         "order": order.to_dict(),
         "earned_points": earned,
         "redeemed_points":redeem_points,
-        "new_balance": user.loyalty_points
+        "new_balance": user.loyalty_points,
+        "group_goal_achieved":bool(goal_achievement),
+        "group_details":goal_achievement
     }) , 201
