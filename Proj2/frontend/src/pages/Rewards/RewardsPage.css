@@ -1,0 +1,14 @@
+.rewards-page { padding: 2rem; }
+.rewards-header { margin-bottom: 1.5rem; }
+.rewards-summary p { margin: 0.2rem 0; }
+.redeem-buttons button { margin-right: 1rem; }
+.coupon-list { display: flex; flex-wrap: wrap; gap: 1rem; }
+.coupon-card {
+  background: #fff4cc;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  min-width: 150px;
+}
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th, td { padding: 0.5rem; border-bottom: 1px solid #ccc; text-align: left; }
