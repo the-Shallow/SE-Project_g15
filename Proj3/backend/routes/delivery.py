@@ -62,7 +62,7 @@ def predict_eta():
         return jsonify({'error': str(e)}), 500
 
 
-@delivery_bp.route('/predict-eta-with-rush-hour', methods=['POST'])
+@delivery_bp.route('/predict-eta-rush-hour', methods=['POST'])
 @jwt_required()
 def predict_eta_with_rush_hour():
     """

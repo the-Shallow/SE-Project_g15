@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { predictETAWithRushHour, findMyCluster } from '../../api/delivery';
 import './GroupCard.css';
 import Button from '../common/Button/Button';
-import deliveryAPI from '../../api/delivery';
 
 const GroupCard = ({ group, onAction, actionLabel }) => {
   const [timeLeft, setTimeLeft] = useState('');
@@ -53,7 +53,7 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
         const distanceKm = group.distance || 5.0;
         const numStops = group.members?.length || 1;
         
-        const eta = await deliveryAPI.predictETAWithRushHour(distanceKm, numStops);
+        const eta = await predictETAWithRushHour(distanceKm, numStops);
         setEtaInfo(eta);
       } catch (error) {
         console.error('Error fetching ETA:', error);
@@ -80,7 +80,7 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
           { lat: 35.7816, lng: -78.6402, group_id: 98, group_name: 'Taco Tuesday' }
         ];
         
-        const result = await deliveryAPI.findMyCluster(group.id, mockNearbyGroups);
+        const result = await findMyCluster(group.id, mockNearbyGroups);
         
         if (result.in_cluster) {
           setClusterInfo(result);
