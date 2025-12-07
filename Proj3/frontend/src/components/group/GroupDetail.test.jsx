@@ -95,10 +95,23 @@ describe('GroupDetail Component', () => {
   });
 
   it('handles poll toggle errors gracefully', async () => {
-    groupsApi.getGroupPolls.mockRejectedValueOnce(new Error('Failed'));
+    /*groupsApi.getGroupPolls.mockRejectedValueOnce(new Error('Failed'));
     render(<GroupDetail {...props} />);
     fireEvent.click(screen.getByRole('button', { name: /View Polls/i }));
-    await waitFor(() => expect(screen.getByText(/error/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/error/i)).toBeInTheDocument());*/
+    groupsApi.getGroupPolls.mockRejectedValueOnce(new Error('Failed'));
+    // FIX: The component calls window.alert, not renders text. Mock and assert the alert call.
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+
+    render(<GroupDetail {...props} />);
+    fireEvent.click(screen.getByRole('button', { name: /View Polls/i }));
+    
+    await waitFor(() => {
+      expect(groupsApi.getGroupPolls).toHaveBeenCalledWith(123);
+      expect(alertSpy).toHaveBeenCalledWith('Failed to load polls');
+    });
+    
+    alertSpy.mockRestore();
   });
 
   it('calls placeGroupOrder when placing an order', async () => {
@@ -138,13 +151,17 @@ describe('GroupDetail Component', () => {
   it('calls edit, close, and create poll callbacks', async () => {
     render(<GroupDetail {...props} />);
     fireEvent.click(screen.getByRole('button', { name: /Create Poll/i }));
+    expect(props.onCreatePoll).toHaveBeenCalledWith(mockGroup); // Added assertion for onCreatePoll
     fireEvent.click(screen.getByRole('button', { name: /Close/i }));
+    expect(props.onClose).toHaveBeenCalled(); // Added assertion for onClose
     // Edit button visible only to organizer
     localStorage.setItem('username', 'Alice');
     render(<GroupDetail {...props} />);
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Edit Group/i })).toBeInTheDocument();
     });
+    fireEvent.click(screen.getByRole('button', { name: /Edit Group/i }));
+    expect(props.onEditGroup).toHaveBeenCalledWith(mockGroup); // Added assertion for onEditGroup
   });
 
   it('updates countdown every second', async () => {

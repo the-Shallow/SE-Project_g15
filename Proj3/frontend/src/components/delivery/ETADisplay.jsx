@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import deliveryAPI from '../../api/delivery';
+import { predictETA, predictETAWithRushHour } from '../../api/delivery';
 import './ETADisplay.css';
 
 const ETADisplay = ({ distanceKm, numStops = 1, useRushHour = true }) => {
@@ -14,8 +14,8 @@ const ETADisplay = ({ distanceKm, numStops = 1, useRushHour = true }) => {
         setError(null);
         
         const data = useRushHour
-          ? await deliveryAPI.predictETAWithRushHour(distanceKm, numStops)
-          : await deliveryAPI.predictETA(distanceKm, numStops);
+          ? await predictETAWithRushHour(distanceKm, numStops)
+          : await predictETA(distanceKm, numStops);
         
         setEtaInfo(data);
       } catch (err) {

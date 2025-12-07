@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import AppRoutes from "./AppRoutes";
+import { CartProvider } from '../context/CartContext';
 
 test("redirects root to login", () => {
   render(
@@ -13,9 +14,11 @@ test("redirects root to login", () => {
 
 test("renders dashboard route", () => {
   render(
-    <MemoryRouter initialEntries={["/dashboard"]}>
-      <AppRoutes />
-    </MemoryRouter>
+    <CartProvider>
+      <MemoryRouter initialEntries={["/dashboard"]}>
+        <AppRoutes />
+      </MemoryRouter>
+    </CartProvider>
   );
   expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
 });

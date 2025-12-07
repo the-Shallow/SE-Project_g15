@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import GroupsPage from './GroupsPage';
+import GroupsPage from './GroupPage';
 import { getUserGroups } from '../../api/groups';
 
 jest.mock('../../api/groups', () => ({

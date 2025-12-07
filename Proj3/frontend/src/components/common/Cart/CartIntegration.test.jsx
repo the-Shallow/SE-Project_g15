@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { CartProvider, useCart } from '../../context/CartContext';
+import { CartProvider, useCart } from '../../../context/CartContext';
 import CartSidebar from '../../components/common/Cart/CartSidebar';
 import Button from '../../components/common/Button/Button';
 
