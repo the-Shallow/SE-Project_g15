@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { predictETAWithRushHour, findMyCluster } from '../../api/delivery';
+import { predictETAWithRushHour, findMyCluster, getActiveGroupsForClustering } from '../../api/delivery';
 import './GroupCard.css';
 import Button from '../common/Button/Button';
 
@@ -45,7 +45,7 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
 
   const status = getStatus();
 
-  // ADD THIS: Fetch AI-powered ETA
+  // Fetch AI-powered ETA
   useEffect(() => {
     const fetchETA = async () => {
       try {
@@ -72,39 +72,53 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
   useEffect(() => {
     const fetchClusterInfo = async () => {
       try {
-        // For demo, we'll use mock nearby groups
-        // In production, you'd fetch all active groups from your API
-        const mockNearbyGroups = [
-          { lat: 35.7796, lng: -78.6382, group_id: group.id, group_name: group.name },
-          { lat: 35.7806, lng: -78.6392, group_id: 99, group_name: 'Pizza Lovers' },
-          { lat: 35.7816, lng: -78.6402, group_id: 98, group_name: 'Taco Tuesday' }
-        ];
+        // Skip if group doesn't have location data
+        if (!group.latitude || !group.longitude) {
+          console.log('Group missing location data, skipping clustering');
+          setClusterInfo(null);
+          return;
+        }
+
+        // Fetch all active groups with locations from backend
+        const activeGroups = await getActiveGroupsForClustering();
         
-        const result = await findMyCluster(group.id, mockNearbyGroups);
+        // If there are no other groups, skip clustering
+        if (!activeGroups || activeGroups.length === 0) {
+          setClusterInfo(null);
+          return;
+        }
+
+        // Convert to format expected by clustering API
+        const locationsForClustering = activeGroups.map(g => ({
+          lat: g.lat,
+          lng: g.lng,
+          group_id: g.group_id,
+          group_name: g.group_name
+        }));
+        
+        // Find cluster for this specific group
+        const result = await findMyCluster(group.id, locationsForClustering);
         
         if (result.in_cluster) {
           setClusterInfo(result);
+        } else {
+          setClusterInfo(null);
         }
       } catch (error) {
         console.error('Error fetching cluster info:', error);
+        // Don't show error to user, just don't display cluster badge
+        setClusterInfo(null);
       }
     };
 
-    // Simple mock data for demo - no API call
+    // Only fetch cluster info for active groups
     if (status !== 'Expired' && status !== 'Full') {
-      // Show cluster badge on active groups
-      setClusterInfo({
-        in_cluster: true,
-        cluster: {
-          size: 3,
-          radius_km: 1.2
-        }
-      });
+      fetchClusterInfo();
     } else {
       // Clear cluster info on expired/full groups
       setClusterInfo(null);
     }
-  }, [status]);
+  }, [group.id, group.latitude, group.longitude, status]);
 
   const statusColors = {
     Open: { bg: '#d1fae5', color: '#059669' },
@@ -182,6 +196,7 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
         </div>
       )}
 
+      {/* UPDATED: Show cluster badge only when real cluster data is available */}
       {clusterInfo && clusterInfo.in_cluster && (
         <div className="cluster-badge-container">
           <span className="cluster-badge">
@@ -191,6 +206,12 @@ const GroupCard = ({ group, onAction, actionLabel }) => {
             <span className="cluster-radius">
               📏 {clusterInfo.cluster.radius_km} km radius
             </span>
+          )}
+          {/* Show cluster mates if available */}
+          {clusterInfo.cluster_mates && clusterInfo.cluster_mates.length > 0 && (
+            <div className="cluster-mates">
+              <small>Nearby: {clusterInfo.cluster_mates.join(', ')}</small>
+            </div>
           )}
         </div>
       )}

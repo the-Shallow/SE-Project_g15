@@ -63,6 +63,16 @@ export const findMyCluster = async (groupId, allLocations) => {
 };
 
 /**
+ * NEW: Get all active groups for clustering
+ * Fetches groups with valid locations that haven't expired
+ * @returns {Promise<Array>} Array of active groups with location data
+ */
+export const getActiveGroupsForClustering = async () => {
+  const response = await api.get('/delivery/active-groups-for-clustering');
+  return response.data;
+};
+
+/**
  * Health check for delivery service
  * @returns {Promise} Service health status
  */
