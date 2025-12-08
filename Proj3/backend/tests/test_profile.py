@@ -10,8 +10,14 @@ Covers user profile management with stats, achievements, and leaderboard:
 """
 
 import pytest
-from models import User, Group, GroupMember, GroupOrder, GroupOrderItem
-from extensions import db
+from datetime import datetime, timezone, timedelta
+
+
+def get_future_time(hours=2):
+    """Helper to get properly formatted future datetime in UTC"""
+    future_time = datetime.now(timezone.utc) + timedelta(hours=hours)
+    # Format as ISO string and replace '+00:00' with 'Z'
+    return future_time.isoformat().replace('+00:00', 'Z')
 
 
 @pytest.fixture
@@ -33,66 +39,102 @@ def auth_header(client):
 
 
 @pytest.fixture
-def setup_test_data(client, auth_header):
-    """Create test groups and orders for stats testing."""
-    from datetime import datetime, timezone
-    
-    # Create a solo group (1 member)
-    solo_group = Group(
-        name="Solo Group",
-        organizer="profileuser",
-        restaurant_id=1,
-        delivery_type="Delivery",
-        delivery_location="Home",
-        max_members=1,
-        next_order_time=datetime.now(timezone.utc)
+def other_user_header(client):
+    """Create another user for multi-user group tests."""
+    client.post(
+        "/api/auth/register",
+        json={
+            "username": "otheruser",
+            "email": "other@example.com",
+            "password": "testpass",
+        },
     )
-    db.session.add(solo_group)
-    db.session.flush()
+    login_resp = client.post(
+        "/api/auth/login", json={"username": "otheruser", "password": "testpass"}
+    )
+    token = login_resp.get_json().get("token")
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def setup_test_data(client, auth_header, other_user_header):
+    """Create test groups and orders for stats testing."""
+    # Create a solo group (1 member) - profileuser is organizer
+    solo_group_data = {
+        "name": "Solo Group",
+        "restaurant_id": 1,
+        "deliveryType": "Delivery",
+        "deliveryLocation": "Home",
+        "maxMembers": 1,
+        "nextOrderTime": get_future_time(2)
+    }
+    solo_response = client.post("/api/groups", json=solo_group_data, headers=auth_header)
     
-    solo_member = GroupMember(group_id=solo_group.id, username="profileuser")
-    db.session.add(solo_member)
+    if solo_response.status_code != 201:
+        print(f"Solo group creation failed: {solo_response.get_json()}")
+    
+    assert solo_response.status_code == 201, f"Failed to create solo group: {solo_response.get_json()}"
+    solo_group = solo_response.get_json()
     
     # Create solo order
-    solo_order = GroupOrder(group_id=solo_group.id, username="profileuser")
-    db.session.add(solo_order)
-    db.session.flush()
-    
-    solo_item = GroupOrderItem(order_id=solo_order.id, menu_item_id=1, quantity=2)
-    db.session.add(solo_item)
-    
-    # Create a pooled group (multiple members)
-    pool_group = Group(
-        name="Pool Group",
-        organizer="otheruser",
-        restaurant_id=2,
-        delivery_type="Delivery",
-        delivery_location="Office",
-        max_members=5,
-        next_order_time=datetime.now(timezone.utc)
+    solo_order_data = {
+        "items": [{"menuItemId": 1, "quantity": 2}],
+        "nextOrderTime": solo_group["nextOrderTime"]
+    }
+    solo_order_response = client.post(
+        f"/api/groups/{solo_group['id']}/orders",
+        json=solo_order_data,
+        headers=auth_header
     )
-    db.session.add(pool_group)
-    db.session.flush()
     
-    pool_member1 = GroupMember(group_id=pool_group.id, username="profileuser")
-    pool_member2 = GroupMember(group_id=pool_group.id, username="otheruser")
-    db.session.add_all([pool_member1, pool_member2])
+    if solo_order_response.status_code != 201:
+        print(f"Solo order creation failed: {solo_order_response.get_json()}")
     
-    # Create pooled order
-    pool_order = GroupOrder(group_id=pool_group.id, username="profileuser")
-    db.session.add(pool_order)
-    db.session.flush()
+    assert solo_order_response.status_code == 201, f"Failed to create solo order: {solo_order_response.get_json()}"
     
-    pool_item = GroupOrderItem(order_id=pool_order.id, menu_item_id=2, quantity=1)
-    db.session.add(pool_item)
+    # Create a pooled group (otheruser is organizer)
+    pool_group_data = {
+        "name": "Pool Group",
+        "restaurant_id": 2,
+        "deliveryType": "Delivery",
+        "deliveryLocation": "Office",
+        "maxMembers": 5,
+        "nextOrderTime": get_future_time(3)
+    }
+    pool_response = client.post("/api/groups", json=pool_group_data, headers=other_user_header)
     
-    db.session.commit()
+    if pool_response.status_code != 201:
+        print(f"Pool group creation failed: {pool_response.get_json()}")
+    
+    assert pool_response.status_code == 201, f"Failed to create pool group: {pool_response.get_json()}"
+    pool_group = pool_response.get_json()
+    
+    # profileuser joins the pool group
+    join_response = client.post(
+        f"/api/groups/{pool_group['id']}/join",
+        headers=auth_header
+    )
+    assert join_response.status_code == 200, f"Failed to join pool group: {join_response.get_json()}"
+    
+    # profileuser places order in pool group
+    pool_order_data = {
+        "items": [{"menuItemId": 2, "quantity": 1}],
+        "nextOrderTime": pool_group["nextOrderTime"]
+    }
+    pool_order_response = client.post(
+        f"/api/groups/{pool_group['id']}/orders",
+        json=pool_order_data,
+        headers=auth_header
+    )
+    
+    if pool_order_response.status_code != 201:
+        print(f"Pool order creation failed: {pool_order_response.get_json()}")
+    
+    assert pool_order_response.status_code == 201, f"Failed to create pool order: {pool_order_response.get_json()}"
     
     return {
         "solo_group": solo_group,
-        "pool_group": pool_group,
-        "solo_order": solo_order,
-        "pool_order": pool_order
+        "pool_group": pool_group
     }
 
 
@@ -125,7 +167,7 @@ def test_get_profile_includes_stats(client, auth_header, setup_test_data):
     
     # Should have 2 total orders (1 solo + 1 pooled)
     assert stats["total_orders"] == 2
-    # Should have 1 pooled order (only the one in pool_group)
+    # Should have 1 pooled order (only the one in pool_group with 2+ members)
     assert stats["pooled_orders"] == 1
     # Score should be calculated
     assert isinstance(stats["score"], int)
@@ -212,36 +254,42 @@ def test_profile_password_not_exposed(client, auth_header):
 # ==================== TEST CASES 11-14: Score Calculation Edge Cases ====================
 
 
-def test_score_caps_at_100(client, auth_header):
+def test_score_caps_at_100(client, auth_header, other_user_header):
     """1️⃣1️⃣ Score should cap at 100 even with many orders"""
-    from datetime import datetime, timezone
-    
     # Create 25 pooled groups with orders (exceeds max for scoring)
     for i in range(25):
-        group = Group(
-            name=f"Pool Group {i}",
-            organizer="otheruser",
-            restaurant_id=1,
-            delivery_type="Delivery",
-            delivery_location="Office",
-            max_members=5,
-            next_order_time=datetime.now(timezone.utc)
+        # Other user creates group
+        group_data = {
+            "name": f"Pool Group {i}",
+            "restaurant_id": 1,
+            "deliveryType": "Delivery",
+            "deliveryLocation": f"Office {i}",
+            "maxMembers": 5,
+            "nextOrderTime": get_future_time(i+1)
+        }
+        group_response = client.post("/api/groups", json=group_data, headers=other_user_header)
+        
+        if group_response.status_code != 201:
+            print(f"Group {i} creation failed: {group_response.get_json()}")
+            
+        assert group_response.status_code == 201, f"Failed to create group {i}: {group_response.get_json()}"
+        group = group_response.get_json()
+        
+        # profileuser joins the group
+        join_response = client.post(f"/api/groups/{group['id']}/join", headers=auth_header)
+        assert join_response.status_code == 200
+        
+        # profileuser places order
+        order_data = {
+            "items": [{"menuItemId": 1, "quantity": 1}],
+            "nextOrderTime": group["nextOrderTime"]
+        }
+        order_response = client.post(
+            f"/api/groups/{group['id']}/orders",
+            json=order_data,
+            headers=auth_header
         )
-        db.session.add(group)
-        db.session.flush()
-        
-        member1 = GroupMember(group_id=group.id, username="profileuser")
-        member2 = GroupMember(group_id=group.id, username="otheruser")
-        db.session.add_all([member1, member2])
-        
-        order = GroupOrder(group_id=group.id, username="profileuser")
-        db.session.add(order)
-        db.session.flush()
-        
-        item = GroupOrderItem(order_id=order.id, menu_item_id=1, quantity=1)
-        db.session.add(item)
-    
-    db.session.commit()
+        assert order_response.status_code == 201
     
     response = client.get("/api/profile/me", headers=auth_header)
     data = response.get_json()
@@ -254,33 +302,35 @@ def test_score_caps_at_100(client, auth_header):
 
 def test_score_only_counts_pooled_orders(client, auth_header):
     """1️⃣2️⃣ Score should only count orders in groups with >1 member as pooled"""
-    from datetime import datetime, timezone
-    
     # Create 5 solo groups (1 member each)
     for i in range(5):
-        group = Group(
-            name=f"Solo Group {i}",
-            organizer="profileuser",
-            restaurant_id=1,
-            delivery_type="Delivery",
-            delivery_location="Home",
-            max_members=1,
-            next_order_time=datetime.now(timezone.utc)
+        group_data = {
+            "name": f"Solo Group {i}",
+            "restaurant_id": 1,
+            "deliveryType": "Delivery",
+            "deliveryLocation": f"Home {i}",
+            "maxMembers": 1,
+            "nextOrderTime": get_future_time(i+1)
+        }
+        group_response = client.post("/api/groups", json=group_data, headers=auth_header)
+        
+        if group_response.status_code != 201:
+            print(f"Solo group {i} creation failed: {group_response.get_json()}")
+            
+        assert group_response.status_code == 201, f"Failed to create solo group {i}: {group_response.get_json()}"
+        group = group_response.get_json()
+        
+        # Create order in solo group
+        order_data = {
+            "items": [{"menuItemId": 1, "quantity": 1}],
+            "nextOrderTime": group["nextOrderTime"]
+        }
+        order_response = client.post(
+            f"/api/groups/{group['id']}/orders",
+            json=order_data,
+            headers=auth_header
         )
-        db.session.add(group)
-        db.session.flush()
-        
-        member = GroupMember(group_id=group.id, username="profileuser")
-        db.session.add(member)
-        
-        order = GroupOrder(group_id=group.id, username="profileuser")
-        db.session.add(order)
-        db.session.flush()
-        
-        item = GroupOrderItem(order_id=order.id, menu_item_id=1, quantity=1)
-        db.session.add(item)
-    
-    db.session.commit()
+        assert order_response.status_code == 201
     
     response = client.get("/api/profile/me", headers=auth_header)
     data = response.get_json()
@@ -301,46 +351,49 @@ def test_past_orders_endpoint(client, auth_header, setup_test_data):
     assert len(orders) == 2  # Should have 2 orders from setup
 
 
-def test_stats_update_after_new_order(client, auth_header, setup_test_data):
+def test_stats_update_after_new_order(client, auth_header, other_user_header, setup_test_data):
     """1️⃣4️⃣ Stats should update when new orders are placed"""
     # Get initial stats
     response1 = client.get("/api/profile/me", headers=auth_header)
     initial_stats = response1.get_json()["stats"]
     initial_total = initial_stats["total_orders"]
+    initial_pooled = initial_stats["pooled_orders"]
     
-    # Create a new pooled order
-    from datetime import datetime, timezone
+    # Create a new pooled group (otheruser creates it)
+    new_group_data = {
+        "name": "New Pool Group",
+        "restaurant_id": 3,
+        "deliveryType": "Delivery",
+        "deliveryLocation": "Campus",
+        "maxMembers": 5,
+        "nextOrderTime": get_future_time(5)
+    }
+    new_group_response = client.post("/api/groups", json=new_group_data, headers=other_user_header)
+    assert new_group_response.status_code == 201
+    new_group = new_group_response.get_json()
     
-    new_group = Group(
-        name="New Pool Group",
-        organizer="otheruser",
-        restaurant_id=3,
-        delivery_type="Delivery",
-        delivery_location="Campus",
-        max_members=5,
-        next_order_time=datetime.now(timezone.utc)
+    # profileuser joins
+    join_response = client.post(f"/api/groups/{new_group['id']}/join", headers=auth_header)
+    assert join_response.status_code == 200
+    
+    # profileuser places order
+    new_order_data = {
+        "items": [{"menuItemId": 3, "quantity": 1}],
+        "nextOrderTime": new_group["nextOrderTime"]
+    }
+    new_order_response = client.post(
+        f"/api/groups/{new_group['id']}/orders",
+        json=new_order_data,
+        headers=auth_header
     )
-    db.session.add(new_group)
-    db.session.flush()
-    
-    member1 = GroupMember(group_id=new_group.id, username="profileuser")
-    member2 = GroupMember(group_id=new_group.id, username="otheruser")
-    db.session.add_all([member1, member2])
-    
-    new_order = GroupOrder(group_id=new_group.id, username="profileuser")
-    db.session.add(new_order)
-    db.session.flush()
-    
-    new_item = GroupOrderItem(order_id=new_order.id, menu_item_id=3, quantity=1)
-    db.session.add(new_item)
-    db.session.commit()
+    assert new_order_response.status_code == 201
     
     # Get updated stats
     response2 = client.get("/api/profile/me", headers=auth_header)
     updated_stats = response2.get_json()["stats"]
     
     assert updated_stats["total_orders"] == initial_total + 1
-    assert updated_stats["pooled_orders"] == initial_stats["pooled_orders"] + 1
+    assert updated_stats["pooled_orders"] == initial_pooled + 1
     assert updated_stats["score"] > initial_stats["score"]
 
 
@@ -366,3 +419,72 @@ def test_update_profile_with_picture(client, auth_header):
     assert response.status_code == 200
     result = response.get_json()
     assert "profile_picture" in result or "message" in result
+
+
+# ==================== Additional Edge Case Tests ====================
+
+
+def test_profile_stats_with_mixed_orders(client, auth_header, other_user_header):
+    """Should correctly count mixed solo and pooled orders"""
+    # Create 3 solo orders
+    for i in range(3):
+        group_data = {
+            "name": f"Solo {i}",
+            "restaurant_id": 1,
+            "deliveryType": "Delivery",
+            "deliveryLocation": "Home",
+            "maxMembers": 1,
+            "nextOrderTime": get_future_time(i+1)
+        }
+        group_response = client.post("/api/groups", json=group_data, headers=auth_header)
+        assert group_response.status_code == 201
+        group = group_response.get_json()
+        
+        order_data = {
+            "items": [{"menuItemId": 1, "quantity": 1}],
+            "nextOrderTime": group["nextOrderTime"]
+        }
+        order_response = client.post(
+            f"/api/groups/{group['id']}/orders", 
+            json=order_data, 
+            headers=auth_header
+        )
+        assert order_response.status_code == 201
+    
+    # Create 2 pooled orders
+    for i in range(2):
+        group_data = {
+            "name": f"Pool {i}",
+            "restaurant_id": 1,
+            "deliveryType": "Delivery",
+            "deliveryLocation": "Office",
+            "maxMembers": 5,
+            "nextOrderTime": get_future_time(i+4)
+        }
+        group_response = client.post("/api/groups", json=group_data, headers=other_user_header)
+        assert group_response.status_code == 201
+        group = group_response.get_json()
+        
+        join_response = client.post(f"/api/groups/{group['id']}/join", headers=auth_header)
+        assert join_response.status_code == 200
+        
+        order_data = {
+            "items": [{"menuItemId": 1, "quantity": 1}],
+            "nextOrderTime": group["nextOrderTime"]
+        }
+        order_response = client.post(
+            f"/api/groups/{group['id']}/orders", 
+            json=order_data, 
+            headers=auth_header
+        )
+        assert order_response.status_code == 201
+    
+    response = client.get("/api/profile/me", headers=auth_header)
+    stats = response.get_json()["stats"]
+    
+    assert stats["total_orders"] == 5
+    assert stats["pooled_orders"] == 2
+    
+    # Score should be: (5/20)*50 + (2/20)*50 = 12.5 + 5 = 17.5 => 18
+    expected = round((5/20)*50 + (2/20)*50)
+    assert stats["score"] == expected

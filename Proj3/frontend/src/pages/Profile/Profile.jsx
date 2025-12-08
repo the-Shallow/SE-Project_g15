@@ -108,11 +108,11 @@ const Profile = () => {
 
   // Get leaderboard message
   const getLeaderboardMessage = () => {
-    if (stats.score >= 100) {
-      return "🎉 Yay!! Your next order is FREE! Congratulations on achieving the perfect score!";
+    if (stats.score >= 90) {
+      return "🎉 Yay!! You are among the top contributors with high orders, leading both sustainable foodpool and regular orders.Congratulations!";
     } else {
       const remaining = 100 - stats.score;
-      return `Your current score is ${stats.score}/100. Achieve ${remaining} more points to get a FREE order!`;
+      return `Your current score is ${stats.score}/100. Achieve ${remaining} more points to become a top contributor!`;
     }
   };
 
@@ -140,7 +140,7 @@ const Profile = () => {
 
           {/* Statistics Section */}
           <div className="stats-section">
-            <h3>📊 Your Food Journey</h3>
+            <h3> Your Food Analytics</h3>
             
             <div className="stats-grid">
               {/* Total Orders */}
@@ -161,7 +161,7 @@ const Profile = () => {
                 </div>
                 <p className="stat-description">
                   {stats.pooled_orders > 0 
-                    ? `🎉 Yay!! You saved money by using the Pool Order Feature ${stats.pooled_orders} time${stats.pooled_orders !== 1 ? 's' : ''}!`
+                    ? `🎉 Yay!! You are contributing towards a sustainable environament using the Pool Order Feature ${stats.pooled_orders} time${stats.pooled_orders !== 1 ? 's' : ''}!`
                     : "Start using Pool Orders to save money and unlock achievements!"}
                 </p>
               </div>
@@ -174,6 +174,7 @@ const Profile = () => {
                 <div 
                   className="score-bar" 
                   style={{ width: `${getScorePercentage()}%` }}
+                  data-testid="score-bar" 
                 >
                   {stats.score}/100
                 </div>
@@ -182,7 +183,7 @@ const Profile = () => {
                 {getLeaderboardMessage()}
               </p>
               <p className="stat-description" style={{ marginTop: '12px', fontSize: '12px' }}>
-                💡 Score calculation: 50% based on total orders, 50% based on pool orders (max 20 orders each for full points)
+                💡 Score calculation is based on your total orders and on the pool orders placed
               </p>
             </div>
           </div>
