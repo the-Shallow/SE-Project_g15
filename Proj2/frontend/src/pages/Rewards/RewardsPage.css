@@ -12,3 +12,22 @@
 }
 table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
 th, td { padding: 0.5rem; border-bottom: 1px solid #ccc; text-align: left; }
+
+.page-section-container {
+  padding: 20px 40px;
+  width: 100%;
+}
+
+.card-box {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}

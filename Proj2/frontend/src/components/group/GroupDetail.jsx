@@ -138,12 +138,17 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
 
     setLoadingOrders(true);
     try {
-      await placeGroupOrder(group.id, {
+      const res = await placeGroupOrder(group.id, {
         items: formattedItems,
         nextOrderTime: group.nextOrderTime
       });
 
-      alert('Order placed successfully!');
+      alert(`Order placed successfully! You earned ${res.data.earned_points} points.`);
+
+      if(res.data.group_goal_achieved){
+        const g  = res.data.group_details;
+        alert(`🎉 Group milestone reached: ${g.reward} for everyone!`);
+      }
       clearCart();
       fetchOrders();
     } catch (err) {

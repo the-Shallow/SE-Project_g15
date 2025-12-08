@@ -1,6 +1,7 @@
 # backend/tests/conftest.py
 import pytest
 from app import create_app
+from models import Restaurant, MenuItem
 from extensions import db
 
 
@@ -12,6 +13,7 @@ def client():
     app.config["SQLALCHEMY_DATABASE_URI"] = (
         "sqlite:///:memory:"  # in-memory DB for tests
     )
+    print(">>> LOADING CONFTEXT <<<")
 
     with app.app_context():
         db.create_all()

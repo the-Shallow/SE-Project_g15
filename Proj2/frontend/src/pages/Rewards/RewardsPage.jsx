@@ -37,7 +37,7 @@ function RewardsPage() {
   };
 
   return (
-    <div className="rewards-page">
+    <div className="page-section-container">
       <h2>🎁 Rewards Dashboard</h2>
       <p>Your Balance: <strong>{rewards.points}</strong> pts</p>
       <p>Tier: {rewards.tier}</p>
@@ -82,7 +82,11 @@ function RewardsPage() {
         <ul>
           {rewards.ledger && rewards.ledger.map(l => (
             <li key={l.id}>
-              [{l.type}] {l.points} pts — {l.meta.reason}
+              {l.type === "bonus" && l.meta.reason === "group_goal_points" ? (
+                <>🎉 Group <b>{l.meta.group_name}</b> hit ${l.meta.milestone / 100}! +{l.points} pts</>
+                ) : (
+                <>[{l.type}] {l.points} pts — {l.meta.reason}</>
+              )}
             </li>
           ))}
         </ul>
