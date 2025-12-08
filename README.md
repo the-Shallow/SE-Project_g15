@@ -255,7 +255,7 @@ git push origin feature/your-feature
 
  📊 Project Milestones
  
-# ✅  Release 2 (November 2025)
+### ✅  Release 2 (November 2025) ###
 
 📍 **Al-Powered Delivery Optimization** - Predictive routing, demand clustering (DBSCAN ML), and adaptive ETA generation with rush-hour adjustments.
 
@@ -266,7 +266,7 @@ git push origin feature/your-feature
 📊 **Analytics & Impact Insights** - Personal analytics, tracking sustainable impact through achievements, and leaderboarddriven engagement..
 
 
-# ✅ Release 1 (October 2025)
+#### ✅ Release 1 (October 2025) ###
 
  🧠 **Core Platform Architecture** - Stable backend and modular API ecosystem enabling real-time data sync, scalability, and secure operations across all modules.
  
