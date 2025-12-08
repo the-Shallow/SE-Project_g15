@@ -44,11 +44,10 @@ FoodPool enables community-driven pooled food orders, letting nearby users combi
 - 🔄 Recurring Pools - Schedule weekly/monthly deliveries
 - 📊 Dynamic Pricing - See savings in real-time as members join
 - 🌱 Eco-Impact Tracking - Track CO₂ saved per pooled delivery
-- ⭐ Gamification - Leaderboards, badges, and streaks
-- Delivery Intelligence - Machine learning clustering and predictive ETA with traffic adjustments
-- Proximity Pool Discovery - Find nearby food pools using location-based radius search
-- Advanced Loyalty Engine - Tier progression, streak bonuses, and redeemable coupons
-- Analytics Dashboard - Track pooled orders, achievements, and leaderboard rankings
+- 🧠 Delivery Intelligence - Machine learning clustering and predictive ETA with traffic adjustments
+- 🏠 Proximity Pool Discovery - Find nearby food pools using location-based radius search
+- 💎 Advanced Loyalty Engine - Tier progression, streak bonuses, and redeemable coupons
+- 📊 Analytics Dashboard - Track pooled orders, achievements, and leaderboard rankings
   
 ---
 
