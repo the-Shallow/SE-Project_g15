@@ -279,7 +279,7 @@ git push origin feature/your-feature
 
 ---
 
-### 💰 Funding
+####💰 Funding
 
 This project is developed as part of the **Software Engineering course at North Carolina State University** by Group 15.  
 Currently, the project is self-funded by the team and does not receive external funding.
