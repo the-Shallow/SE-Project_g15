@@ -2,7 +2,7 @@ from flask import request, jsonify
 from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt
 from extensions import db
-from models import Group, GroupMember
+from models import Group, GroupMember, User
 from . import bp
 from .orders import parse_iso_utc
 from datetime import timezone
@@ -53,6 +53,11 @@ def create_group():
         claims = get_jwt()
         username = claims.get("username")  # Get organizer from JWT token
 
+        # Get user's location
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
         data = request.json
         new_group = Group(
             name=data["name"],
@@ -62,6 +67,11 @@ def create_group():
             delivery_location=data["deliveryLocation"],
             next_order_time=parse_iso_utc(data["nextOrderTime"]),
             max_members=data.get("maxMembers", 10),
+            # Copy location from organizer
+            latitude=user.latitude,
+            longitude=user.longitude,
+            visibility=data.get("visibility", "public"),
+            search_radius_km=data.get("searchRadiusKm", 5.0)
         )
         db.session.add(new_group)
         db.session.flush()
@@ -102,6 +112,15 @@ def update_group(group_id):
             group.next_order_time = parse_iso_utc(data["nextOrderTime"])
         if "maxMembers" in data:
             group.max_members = data["maxMembers"]
+        # Allow updating location
+        if "latitude" in data:
+            group.latitude = data["latitude"]
+        if "longitude" in data:
+            group.longitude = data["longitude"]
+        if "visibility" in data:
+            group.visibility = data["visibility"]
+        if "searchRadiusKm" in data:
+            group.search_radius_km = data["searchRadiusKm"]
 
         group.updated_at = datetime.utcnow().replace(tzinfo=timezone.utc)
         db.session.commit()
