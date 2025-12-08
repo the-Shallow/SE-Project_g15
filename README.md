@@ -249,11 +249,11 @@ git push origin feature/your-feature
 ---
  📞 Discussion Forum
 
-[![Discussion Forum](https://img.shields.io/badge/Discussion-Join%20Us-blue?style=for-the-badge)]([https://discord.com/invite/QNRheurx](https://discord.com/channels/1407018980891431053/1407061939091279903))
+[![Discussion Forum](https://img.shields.io/badge/Discussion-Join%20Us-blue?style=for-the-badge)]([(https://discord.com/channels/1407018980891431053/1407061939091279903)]())
 
 ---
 
- 📊 ###Project Milestones###
+ 📊 Project Milestones
  
 # ✅  Release 2 (November 2025)
 
