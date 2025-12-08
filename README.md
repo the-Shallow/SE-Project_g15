@@ -3,7 +3,6 @@ The repository contains submissions for Software Engineering project done by Gro
 
 # 🍕 FoodPool: Eat Together. Save Together.
 
-[![Build Status](https://github.com/srushti3333/SE-Project_g15/actions/workflows/ci.yml/badge.svg)](https://github.com/srushti3333/SE-Project_g15/actions)
 [![codecov](https://codecov.io/gh/the-Shallow/SE-Project_g15/branch/main/graph/badge.svg?token=R1FHWXT0ML)](https://codecov.io/gh/the-Shallow/SE-Project_g15)
 ![Flake8](https://img.shields.io/badge/style-flake8-blue)
 ![ESLint](https://img.shields.io/badge/lint-eslint-purple)
@@ -22,8 +21,7 @@ The repository contains submissions for Software Engineering project done by Gro
 ---
 
  📹 Demo Video
-
-🎥 [Watch our demo here](https://drive.google.com/file/d/1axWr_0DzbPB18q4z_mSvZ5vTAb1d4ghk/view)
+🎥 [Group 6 - Project 3 - Watch our demo here](https://youtu.be/Y8eIS8SAdfw)
 
 ---
 
@@ -40,7 +38,6 @@ FoodPool enables community-driven pooled food orders, letting nearby users combi
 ---
 
  ✨ Features
-
 - 🎯 Organizer-Led Orders - Single/multi-origin, curated menus, poll-based finalization
 - 📍 Location-Based Pools - Discover and join nearby pools
 - 💬 Real-Time Collaboration - Live chat, notifications, countdowns
@@ -48,7 +45,11 @@ FoodPool enables community-driven pooled food orders, letting nearby users combi
 - 📊 Dynamic Pricing - See savings in real-time as members join
 - 🌱 Eco-Impact Tracking - Track CO₂ saved per pooled delivery
 - ⭐ Gamification - Leaderboards, badges, and streaks
-
+- Delivery Intelligence - Machine learning clustering and predictive ETA with traffic adjustments
+- Proximity Pool Discovery - Find nearby food pools using location-based radius search
+- Advanced Loyalty Engine - Tier progression, streak bonuses, and redeemable coupons
+- Analytics Dashboard - Track pooled orders, achievements, and leaderboard rankings
+  
 ---
 
 ### 📚 Case Studies
@@ -186,7 +187,7 @@ If you encounter issues while setting up or running FoodPool, try the following 
  📁 Project Structure
 ```
 SE-Project_g15/
-├── Proj2/
+├── Proj3/
 │   ├── backend/
 │   │   ├── app.py              # Flask entry point
 │   │   ├── models/             # Database models
@@ -249,11 +250,22 @@ git push origin feature/your-feature
 ---
  📞 Discussion Forum
 
-[![Discussion Forum](https://img.shields.io/badge/Discussion-Join%20Us-blue?style=for-the-badge)](https://discord.com/invite/QNRheurx)
+[![Discussion Forum](https://img.shields.io/badge/Discussion-Join%20Us-blue?style=for-the-badge)]([https://discord.com/invite/QNRheurx](https://discord.com/channels/1407018980891431053/1407061939091279903))
 
 ---
 
- 📊 Project Milestones
+ 📊 ###Project Milestones###
+ 
+# ✅  Release 2 (November 2025)
+
+📍 **Al-Powered Delivery Optimization** - Predictive routing, demand clustering (DBSCAN ML), and adaptive ETA generation with rush-hour adjustments.
+
+🌐 **Proximity-Based Pool Discovery** - Location-based search with configurable radius, distance calculations, and visibility filters to find nearby active pools.
+
+💎 **Enhanced Reward System** - Multi-tier loyalty (Bronze/Silver/Gold), streak tracking, coupon redemption, and point-based discounts.
+
+📊 **Analytics & Impact Insights** - Personal analytics, tracking sustainable impact through achievements, and leaderboarddriven engagement..
+
 
 # ✅ Release 1 (October 2025)
 
@@ -265,16 +277,6 @@ git push origin feature/your-feature
 
 ⚡ **Real-Time Interaction Framework** - Low-latency polling, instant decision updates, and countdown-based coordination driving group synchronization and engagement.
 
-
-# 🚀 Release 2 (November 2025)
-
-📍 **AI-Powered Delivery Optimization** - Predictive routing, demand clustering, and adaptive ETA generation through real-time location intelligence.
-
-🌐 **Social Discovery & Network Dynamics** - Proximity-based group discovery, map visualizations, in-app messaging, and social graph integration for organic community growth.
-
-💎 **Reward Intelligence & Growth Loops** - Behavioral loyalty models, dynamic cashback tiers, and restaurant-driven partnerships that scale user retention.
-
-📊 **Gamified Analytics & Impact Insights** - Personal spending analytics, sustainability impact tracking, achievement ecosystems, and leaderboard-driven engagement.
 
 ---
 
@@ -306,14 +308,6 @@ All pull requests require:
 
 ---
 
- 📧 Contact
-
-- GitHub Issues: [Report bugs or request features](https://github.com/srushti3333/SE-Project_g15/issues)
-- Discussion Forum: [Join the community](https://discord.com/invite/QNRheurx)
-- Email: sthakar2@ncsu.edu, stpatel4@ncsu.edu, vpatel34@ncsu.edu, dbpatel5@ncsu.edu
-
----
-
 
 ### 📖 How to Cite
 
@@ -325,7 +319,7 @@ This file can be used with citation tools to automatically generate BibTeX, RIS,
 
  🙏 Acknowledgments
 
-Built with ❤️ by Group 15 for Software Engineering Course
+Built with ❤️ by Group 6 for Software Engineering Course
 
 Special thanks to our instructors and all contributors!
 
