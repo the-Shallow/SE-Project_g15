@@ -238,14 +238,14 @@ git push origin feature/your-feature
 
 ---
 
- 👥 Team - Group 15
+ 👥 Team - Group 6
 
 | Name |
 |------|
-| Dev Patel | 
-| Sakhi Patel | 
-| Srushti Thakar | 
-| Vaishvi Patel | 
+| MIA GLENN | 
+| RICHA JHA | 
+| ISHWARYA GANDAMSETTY | 
+| KHUSH PATEL | 
 
 ---
  📞 Discussion Forum
