@@ -4,7 +4,7 @@ from routes import bp as api_bp
 from config import Config
 import os
 
-def create_app():
+def create_app(config_override=None):
     app = Flask(__name__)
 
     # Load DB config from env / config.py
@@ -17,6 +17,9 @@ def create_app():
     )
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
+    if config_override:
+        app.config.update(config_override)
+
     # Serve uploaded profile pictures via /uploads/profile_pictures/<filename>
     @app.route("/uploads/profile_pictures/<filename>")
     def uploaded_file(filename):
@@ -25,7 +28,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
-
+    print("TEST DB URI =", app.config["SQLALCHEMY_DATABASE_URI"])
     cors.init_app(
         app,
         resources={r"/api/*": {"origins": "http://localhost:3000"}},

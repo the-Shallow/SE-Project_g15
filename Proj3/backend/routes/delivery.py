@@ -6,6 +6,9 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
 from ai_optimization.eta_predictor import ETAPredictor
 from ai_optimization.clustering import DemandClusterer
+from datetime import datetime, timezone
+from models import Group  # Import your Group model
+from extensions import db
 
 delivery_bp = Blueprint('delivery', __name__)
 
@@ -62,7 +65,7 @@ def predict_eta():
         return jsonify({'error': str(e)}), 500
 
 
-@delivery_bp.route('/predict-eta-with-rush-hour', methods=['POST'])
+@delivery_bp.route('/predict-eta-rush-hour', methods=['POST'])
 @jwt_required()
 def predict_eta_with_rush_hour():
     """
@@ -156,6 +159,58 @@ def cluster_locations():
                 'min_cluster_size': min_cluster_size
             }
         }), 200
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@delivery_bp.route('/active-groups-for-clustering', methods=['GET'])
+@jwt_required()
+def get_active_groups_for_clustering():
+    """
+    Get all active groups with location data for clustering
+    Returns only groups that:
+    - Have valid latitude/longitude
+    - Have not expired (next_order_time > now)
+    - Are public
+    
+    Returns:
+    [
+        {
+            "group_id": 1,
+            "group_name": "Pizza Lovers",
+            "lat": 35.7796,
+            "lng": -78.6382,
+            "restaurant_id": 1,
+            "members_count": 5,
+            "next_order_time": "2025-12-08T18:00:00Z"
+        },
+        ...
+    ]
+    """
+    try:
+        # Get all active groups with location data
+        active_groups = Group.query.filter(
+            Group.next_order_time > datetime.now(timezone.utc),
+            Group.visibility == 'public',
+            Group.latitude.isnot(None),
+            Group.longitude.isnot(None)
+        ).all()
+        
+        # Format for clustering
+        groups_data = []
+        for group in active_groups:
+            groups_data.append({
+                'group_id': group.id,
+                'group_name': group.name,
+                'lat': group.latitude,
+                'lng': group.longitude,
+                'restaurant_id': group.restaurant_id,
+                'members_count': len(group.members),
+                'next_order_time': group.next_order_time.isoformat() if group.next_order_time else None,
+                'delivery_location': group.delivery_location
+            })
+        
+        return jsonify(groups_data), 200
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500

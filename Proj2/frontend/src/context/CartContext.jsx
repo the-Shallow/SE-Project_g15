@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import { calculatePoints } from '../components/restaurant/MenuItemCard';
+import { useRewards } from './RewardsContext';
 
 const CartContext = createContext();
 
@@ -20,6 +21,7 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
+  const { rewards } = useRewards();
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
 
@@ -56,7 +58,10 @@ export const CartProvider = ({ children }) => {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const expectedPoints = cart.reduce(
-    (sum,item) => sum + calculatePoints(item.price*item.quantity,1,item.reward_multiplier),0
+    (sum,item) => sum + calculatePoints(item.price*item.quantity,1,item.reward_multiplier,{
+    streak_count: rewards.streak,
+    tier_multiplier: rewards.tier_multiplier,
+  }),0
   )
 
   const value = {

@@ -186,7 +186,8 @@ export const PAGES = {
   MY_GROUPS: 'mygroups',
   FIND_GROUPS: 'findgroups',
   EDIT_GROUP: 'editgroup',
-  CREATE_POLL: 'createpoll'
+  CREATE_POLL: 'createpoll',
+  REWARDS: "rewards"
 };
 
 // Order options

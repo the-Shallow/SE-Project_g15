@@ -199,7 +199,10 @@ const handlePreviewRedemption = async () => {
       setRedeemPoints(0);
       setCouponCode('');
       setFinalTotal(cartTotal + deliveryFee);
-      const reward = calculatePoints(cartTotal, 1, restaurant.reward_multiplier);
+      const reward = calculatePoints(cartTotal, 1, restaurant.reward_multiplier, {
+    streak_count: rewards.streak,
+    tier_multiplier: rewards.tier_multiplier,
+  });
       addPointsToUser(reward);
 
       setShowSuccess(true);
@@ -260,7 +263,10 @@ const handlePreviewRedemption = async () => {
       setRedeemPoints(0);
       setCouponCode('');
       setFinalTotal(cartTotal + deliveryFee);
-      const reward = calculatePoints(cartTotal, maxMembers, restaurant.reward_multiplier);
+      const reward = calculatePoints(cartTotal, maxMembers, restaurant.reward_multiplier,{
+    streak_count: rewards.streak,
+    tier_multiplier: rewards.tier_multiplier,
+  });
       addPointsToUser(reward);
 
       setShowSuccess(true);
@@ -292,7 +298,10 @@ const handlePreviewRedemption = async () => {
       });
 
       const poolSize = pool.groupData.members.length + 1;
-      const reward = calculatePoints(cartTotal, poolSize, restaurant.reward_multiplier);
+      const reward = calculatePoints(cartTotal, poolSize, restaurant.reward_multiplier,{
+    streak_count: rewards.streak,
+    tier_multiplier: rewards.tier_multiplier,
+  });
       addPointsToUser(reward);
 
 
@@ -378,7 +387,10 @@ const handlePreviewRedemption = async () => {
               </div>
               <div style={styles.optionDetails}>
               <div style={styles.rewardPreview}>
-                ⭐ Earn ~{calculatePoints(cartTotal, 1, restaurant.reward_multiplier)} points
+                ⭐ Earn ~{calculatePoints(cartTotal, 1, restaurant.reward_multiplier,{
+    streak_count: rewards.streak,
+    tier_multiplier: rewards.tier_multiplier,
+  })} points
               </div>
                 <div>Full delivery fee: ${deliveryFee.toFixed(2)}</div>
               </div>
@@ -408,7 +420,10 @@ const handlePreviewRedemption = async () => {
               </div>
               <div style={styles.optionDetails}>
               <div style={styles.rewardPreview}>
-                ⭐ Potential: ~{calculatePoints(cartTotal, maxMembers, restaurant.reward_multiplier)} points
+                ⭐ Potential: ~{calculatePoints(cartTotal, maxMembers, restaurant.reward_multiplier,{
+    streak_count: rewards.streak,
+    tier_multiplier: rewards.tier_multiplier,
+  })} points
               </div>
               <p style={{ fontSize: '12px', color: '#6b7280' }}>
                 (Assuming {maxMembers} members join)
@@ -807,7 +822,10 @@ const handlePreviewRedemption = async () => {
 
                     <div style={styles.poolSavings}>
                     <div style={styles.poolRewards}>
-                      ⭐ Earn ~{calculatePoints(cartTotal, pool.currentMembers + 1, restaurant.reward_multiplier)} points
+                      ⭐ Earn ~{calculatePoints(cartTotal, pool.currentMembers + 1, restaurant.reward_multiplier,{
+    streak_count: rewards.streak,
+    tier_multiplier: rewards.tier_multiplier,
+  })} points
                     </div>
                       <TrendingDown size={18} color="#059669" />
                       <span>Save ${pool.estimatedSavings} on delivery</span>

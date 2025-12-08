@@ -14,7 +14,9 @@ import LocationPermission from '../../components/discovery/LocationPermission';
 import CreatePollPage from '../Poll/CreatePollPage';
 import { getUserGroups, getAllGroups, getGroupDetails, joinGroup } from '../../api/groups';
 import RewardsWidget from '../../components/rewards/RewardsWidget';
-
+import RewardsPage from '../Rewards/RewardsPage';
+import { useRewards } from '../../context/RewardsContext';
+import { redeemPoints, redeemCoupon } from '../../api/rewards';
 
 
 import './Dashboard.css';
@@ -141,6 +143,38 @@ function Dashboard() {
       if (filterStatus === "expired") return diffMinutes <= 0;
       return true;
     });
+
+    const { rewards, refreshRewards } = useRewards();
+      const [pointsToUse, setPointsToUse] = useState(200);
+      // const [loading, setLoading] = useState(false);
+      console.log(rewards);
+    
+      const handleRedeemPoints = async () => {
+        setLoading(true);
+        try {
+          await redeemPoints(pointsToUse, "manual");
+          await refreshRewards();
+          alert(`Redeemed ${pointsToUse} points successfully!`);
+        } catch (err) {
+          alert(err.response?.data?.error || "Redemption failed");
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      const handleRedeemCoupon = async (type) => {
+        setLoading(true);
+        try {
+          await redeemCoupon(type);
+          await refreshRewards();
+          alert(`Redeemed ${type} coupon successfully!`);
+        } catch (err) {
+          console.log(err);
+          alert(err.response?.data?.error || "Coupon redemption failed");
+        } finally {
+          setLoading(false);
+        }
+      };
 
 
   return (
@@ -378,6 +412,184 @@ function Dashboard() {
             }}
           />
         )}
+      {currentPage === PAGES.REWARDS && (
+        <div className="rewards-wrapper">
+
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center">
+              {/* <span className="text-white text-2xl">🎁</span> */}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">🎁 Rewards Dashboard</h1>
+              <p className="text-gray-500">Redeem points and unlock exclusive perks</p>
+            </div>
+          </div>
+
+          {/* Balance + Tier */}
+          <div className="rewards-card mb-6">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span className="text-blue-600 text-3xl">🪙</span>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">Your Balance</p>
+                  <p className="text-4xl font-bold">{rewards.points} points</p>
+                  {/* <p className="text-sm text-gray-500">points</p> */}
+                </div>
+              </div>
+
+              <div className="text-right">
+                <p className="text-sm text-gray-500 mb-1">Current Tier</p>
+                <span className="px-4 py-2 rounded-lg border bg-yellow-100 text-yellow-700 font-semibold">
+                  🏆 {rewards.tier}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+
+            {/* Redeem Points */}
+            <div className="rewards-card">
+              <h2 className="text-lg font-semibold mb-3">✨ Redeem Points</h2>
+
+              <div className="flex gap-3 mb-3">
+                <input
+                  type="number"
+                  className="border rounded px-3 py-2 w-full"
+                  placeholder="Enter points (min 200)"
+                  min={200}
+                  value={pointsToUse}
+                  onChange={(e) => setPointsToUse(Number(e.target.value))}
+                />
+                <Button onClick={handleRedeemPoints} disabled={loading}>
+                  Redeem
+                </Button>
+              </div>
+
+              <p className="text-xs text-gray-500">
+                Minimum 200 points required for redemption
+              </p>
+            </div>
+
+            {/* Coupons */}
+            <div className="rewards-card">
+              <h2 className="text-lg font-semibold mb-3">🎟️ Get Coupons</h2>
+
+              <Button
+                variant="outline"
+                className="w-full flex gap-3 py-3 mb-3"
+                onClick={() => handleRedeemCoupon("percent_off")}
+                disabled={loading || rewards.points < 500}
+              >
+                <span className="text-2xl">🎫</span>
+                <div className="text-left">
+                  <p className="font-medium">20% Off Coupon</p>
+                  <p className="text-xs text-gray-500">500 points</p>
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full flex gap-3 py-3"
+                onClick={() => handleRedeemCoupon("flat")}
+                disabled={loading || rewards.points < 400}
+              >
+                <span className="text-2xl">🍕</span>
+                <div className="text-left">
+                  <p className="font-medium">$4 Voucher</p>
+                  <p className="text-xs text-gray-500">400 points</p>
+                </div>
+              </Button>
+            </div>
+          </div>
+
+          {/* Active Coupons */}
+          <div className="rewards-card mb-6">
+            <h2 className="text-lg font-semibold mb-4">🎫 Active Coupons</h2>
+
+            {rewards.coupons.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">No active coupons</p>
+            ) : (
+              <div className="space-y-3">
+                {rewards.coupons.map((c) => (
+                  <div
+                    key={c.code}
+                    className="p-4 flex justify-between rounded-lg border bg-gray-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                        🎟️
+                      </div>
+                      <div>
+                        <p className="font-mono font-bold">{c.code}</p>
+                        <p className="text-sm text-gray-500">
+                          {c.type === "percent_off" ? `${c.value}% off` : `$${c.value} off`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                      Expires {new Date(c.expires_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+    </div>
+
+    {/* Recent Activity */}
+    <div className="rewards-card mb-12">
+      <h2 className="text-lg font-semibold mb-4">📜 Recent Activity</h2>
+
+      {rewards.ledger.map((entry, index) => (
+        <div key={entry.id}>
+          <div className="flex justify-between items-center py-2">
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  entry.points > 0 ? "bg-green-100" : "bg-red-100"
+                }`}
+              >
+                {entry.points > 0 ? "➕" : "➖"}
+              </div>
+
+              <p className="text-sm">
+                {entry.type === "bonus" &&
+                entry.meta.reason === "group_goal_points" ? (
+                  <>
+                    🎉 Group <b>{entry.meta.group_name}</b> hit $
+                    {(entry.meta.milestone / 100).toFixed(0)}!
+                  </>
+                ) : (
+                  <>[{entry.type}] {entry.meta.reason.replace(/_/g, " ")}</>
+                )}
+              </p>
+            </div>
+
+            <span
+              className={`font-semibold ${
+                entry.points > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {entry.points > 0 ? "+" : ""}
+              {entry.points} pts
+            </span>
+          </div>
+
+          {index < rewards.ledger.length - 1 && (
+            <hr className="border-gray-200 my-2" />
+          )}
+        </div>
+      ))}
+    </div>
+
+  </div>
+)}
+
       </div>
 
       <CartSidebar selectedRestaurant={selectedRestaurant} />

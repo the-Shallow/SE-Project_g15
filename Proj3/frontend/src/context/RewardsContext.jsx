@@ -4,7 +4,17 @@ import api from '../api/axios';
 const RewardsContext = createContext();
 
 export const RewardsProvider = ({ children }) => {
-  const [rewards, setRewards] = useState({ points: 0, tier: 'Bronze' });
+  const [rewards, setRewards] = useState({ points: 0, tier: 'Bronze', streak: 0, coupons: [], ledger: [] });
+
+
+  const getTierMultiplier = (tier) => {
+    switch ((tier || '').toLowerCase()) {
+      case 'silver': return 1.1;
+      case 'gold': return 1.25;
+      case 'platinum': return 1.5;
+      default: return 1.0;
+    }
+  };
 
   const refreshRewards = async () => {
     try {
