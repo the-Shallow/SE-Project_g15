@@ -190,6 +190,7 @@ SE-Project_g15/
 │   ├── backend/
 │   │   ├── app.py              # Flask entry point
 │   │   ├── models/             # Database models
+|   |   |── ai_optimization/
 │   │   ├── controllers/        # Relevant controllers
 │   │   ├── routes/             # API endpoints
 │   │   ├── requirements.txt    # Dependencies
@@ -202,6 +203,7 @@ SE-Project_g15/
 │       │   ├── pages/          # Frontend tests present with each related file 
 │       │   ├── components/     # Common Components & Frontend tests present with each related file 
 │       │   └── context/        # App context
+|       |   ├── api/            # App api
 │       │   └── routes/         # App route setup
 │       │   └── utils/          # Common utility constants
 │       │   └── hooks/          # Common hooks to use
