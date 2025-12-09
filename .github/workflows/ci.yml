@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend-tests:
-    name: Proj2/backend Tests
+    name: Proj3/backend Tests
     runs-on: ubuntu-latest
     
     services:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd Proj2/backend
+          cd Proj3/backend
           pip install -r requirements.txt
           pip install pytest pytest-cov coverage
 
@@ -52,7 +52,7 @@ jobs:
           DB_USER: postgres
           DB_PASSWORD: postgres
         run: |
-          cd Proj2/backend
+          cd Proj3/backend
           echo "Current directory: $(pwd)"
           echo "Python version: $(python --version)"
           echo "Pip list:"
@@ -67,7 +67,7 @@ jobs:
 
       - name: Check coverage file
         run: |
-          cd Proj2/backend
+          cd Proj3/backend
           echo "Checking for coverage files..."
           ls -la *.xml || echo "No XML files found"
           ls -la coverage.xml || echo "No coverage.xml found"
@@ -80,7 +80,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          files: ./Proj2/backend/coverage.xml
+          files: ./Proj3/backend/coverage.xml
           flags: backend
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
@@ -101,12 +101,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd Proj2/frontend
+          cd Proj3/frontend
           npm ci || npm install
 
       - name: Run tests with coverage
         run: |
-          cd Proj2/frontend
+          cd Proj3/frontend
           npm test -- --coverage --passWithNoTests --watchAll=false || echo "No tests found yet"
           ls -la coverage/ || echo "No coverage directory found"
         continue-on-error: true
@@ -114,14 +114,14 @@ jobs:
       - name: Upload frontend coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          files: ./Proj2/frontend/coverage/lcov.info
+          files: ./Proj3/frontend/coverage/lcov.info
           flags: frontend
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
 
       - name: Build
         run: |
-          cd Proj2/frontend
+          cd Proj3/frontend
           CI=false npm run build  # Ignore warnings so build passes
 
   lint:
@@ -133,6 +133,6 @@ jobs:
       
       - name: Check Python files
         run: |
-          cd Proj2/backend
+          cd Proj3/backend
           python -m py_compile *.py || echo "Python files checked"
         continue-on-error: true
