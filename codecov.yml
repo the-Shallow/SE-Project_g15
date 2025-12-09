@@ -14,19 +14,19 @@ coverage:
 flags:
   backend:
     paths:
-      - Proj2/backend/
+      - Proj3/backend/
   frontend:
     paths:
-      - Proj2/frontend/src/
+      - Proj3/frontend/src/
 
 ignore:
-  - "Proj2/backend/tests/"
-  - "Proj2/frontend/src/**/*.test.js"
-  - "Proj2/frontend/src/**/*.test.jsx"
-  - "Proj2/frontend/src/setupTests.js"
-  - "Proj2/frontend/src/reportWebVitals.js"
-  - "Proj2/backend/uploads/"
-  - "Proj2/backend/htmlcov/"
+  - "Proj3/backend/tests/"
+  - "Proj3/frontend/src/**/*.test.js"
+  - "Proj3/frontend/src/**/*.test.jsx"
+  - "Proj3/frontend/src/setupTests.js"
+  - "Proj3/frontend/src/reportWebVitals.js"
+  - "Proj3/backend/uploads/"
+  - "Proj3/backend/htmlcov/"
   - "Proj1/"
 
 comment:
